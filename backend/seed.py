@@ -48,6 +48,14 @@ def build_seed_data() -> dict[str, list]:
             "role": "PRODUCT_OWNER",
             "project_ids": ["project-agileo"],
         },
+        {
+            "id": "user-david",
+            "name": "David Smith",
+            "email": "david.smith@agileo.app",
+            "avatar_color": "#10b981",
+            "role": "DEVELOPER",
+            "project_ids": [],
+        },
     ]
 
     projects = [

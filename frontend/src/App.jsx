@@ -50,13 +50,13 @@ export default function App() {
     closeSlidePanel()
   }
   
-  const handleProjectEdit = async (id, data) => {
+  const handleProjectUpdate = async (id, data) => {
     await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
-    fetchProjects()
+    await fetchProjects()
     if (selectedProject?.id === id) {
       setSelectedProject({ ...selectedProject, ...data })
     }
@@ -81,18 +81,23 @@ export default function App() {
     closeSlidePanel()
   }
   
-  const handleTaskEdit = async (taskId, data) => {
-    await fetch(`/api/tasks/${taskId}`, {
+  const handleTaskUpdate = async (id, data) => {
+    await fetch(`/api/tasks/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
+    await fetchProjects()
     closeSlidePanel()
   }
   
-  const handleTaskDelete = async (taskId) => {
-    await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
-    closeSlidePanel()
+  const handleTaskDelete = async (id) => {
+    if (confirm(t('task.deleteConfirm'))) {
+      await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE'
+      })
+      await fetchProjects()
+    }
   }
   
   // CRUD: Members
@@ -142,7 +147,7 @@ export default function App() {
             projects={projects} 
             onProjectClick={(p) => { setSelectedProject(p); setView('project') }}
             onNewProject={() => openSlidePanel({ type: 'projectForm', onSave: handleProjectCreate })}
-            onEdit={(p) => openSlidePanel({ type: 'projectForm', onSave: (data) => handleProjectEdit(p.id, data), editData: p })}
+            onEdit={(p) => openSlidePanel({ type: 'projectForm', onSave: (data) => handleProjectUpdate(p.id, data), editData: p })}
             onDelete={(id) => handleProjectDelete(id)}
           />
         )}
@@ -152,8 +157,15 @@ export default function App() {
             project={selectedProject}
             onBack={() => { setView('dashboard'); setSelectedProject(null) }}
             onTaskCreate={(projectId, sprintId, data) => handleTaskCreate(projectId, sprintId, data)}
-            onTaskEdit={(task) => openSlidePanel({ type: 'taskForm', onSave: (data) => handleTaskEdit(task.id, data), editData: task })}
-            onTaskDelete={(taskId) => handleTaskDelete(taskId)}
+            onTaskEdit={async (task) => openSlidePanel({
+              type: 'taskForm',
+              editData: task,
+              onSave: async (data) => {
+                await handleTaskUpdate(task.id, data)
+                // The ProjectDetailView will refetch due to its own logic or we can trigger it
+              }
+            })}
+            onTaskDelete={handleTaskDelete}
             onInviteMember={(projectId, userId) => handleInviteMember(projectId, userId)}
             onRemoveMember={(projectId, userId) => handleRemoveMember(projectId, userId)}
             openSlidePanel={openSlidePanel}
@@ -429,13 +441,22 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   
   const activeSprint = sprints.find(s => s.status === 'ACTIVE')
   
-  useEffect(() => {
+  const fetchTasks = () => {
     if (activeSprint) {
       fetch(`/api/sprints/${activeSprint.id}/tasks`)
         .then(r => r.json())
         .then(setTasks)
     }
+  }
+
+  useEffect(() => {
+    fetchTasks()
   }, [activeSprint])
+
+  const handleTaskAction = async (action, ...args) => {
+    await action(...args)
+    fetchTasks()
+  }
   
   const handleDragEnd = async (taskId, newStatus) => {
     await fetch(`/api/tasks/${taskId}/status`, {
@@ -486,7 +507,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
     { id: 'members', label: t('tabs.members') }
   ]
   
-  const columns = [
+  const KANBAN_COLUMNS = [
     { id: 'TODO', label: t('status.TODO'), color: '#9ca3af' },
     { id: 'IN_PROGRESS', label: t('status.IN_PROGRESS'), color: '#f97316' },
     { id: 'IN_REVIEW', label: t('status.IN_REVIEW'), color: '#3b82f6' },
@@ -535,11 +556,11 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       {activeTab === 'board' && (
         <KanbanBoard 
           tasks={tasks} 
-          columns={columns} 
+          columns={KANBAN_COLUMNS} 
           onDragEnd={handleDragEnd}
           onAddTask={handleAddTask}
-          onTaskEdit={onTaskEdit}
-          onTaskDelete={onTaskDelete}
+          onTaskEdit={(task) => handleTaskAction(onTaskEdit, task)}
+          onTaskDelete={(taskId) => handleTaskAction(onTaskDelete, taskId)}
         />
       )}
       
