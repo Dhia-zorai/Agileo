@@ -1,0 +1,13 @@
+{
+  "build": {
+    "src": "main.py",
+    "requirements": []
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/main.py",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    }
+  ]
+}

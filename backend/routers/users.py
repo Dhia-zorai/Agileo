@@ -1,0 +1,96 @@
+from fastapi import APIRouter, HTTPException
+
+from models import AddMemberRequest, UserCreate
+from storage import generate_id, read_json, write_json
+
+
+router = APIRouter(tags=["users"])
+
+
+def _project_or_404(project_id: str) -> dict:
+    projects = read_json("projects.json")
+    project = next((item for item in projects if item.get("id") == project_id), None)
+    if not project:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return project
+
+
+def _user_or_404(user_id: str) -> dict:
+    users = read_json("users.json")
+    user = next((item for item in users if item.get("id") == user_id), None)
+    if not user:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return user
+
+
+@router.get("/api/users")
+def list_users():
+    return read_json("users.json")
+
+
+@router.post("/api/users", status_code=201)
+def create_user(payload: UserCreate):
+    users = read_json("users.json")
+    new_user = {
+        "id": generate_id(),
+        "name": payload.name,
+        "email": payload.email,
+        "avatar_color": payload.avatar_color,
+        "role": payload.role.value,
+        "project_ids": payload.project_ids,
+    }
+    users.append(new_user)
+    write_json("users.json", users)
+    return new_user
+
+
+@router.get("/api/projects/{project_id}/members")
+def list_project_members(project_id: str):
+    project = _project_or_404(project_id)
+    member_ids = set(project.get("members", []))
+    users = read_json("users.json")
+    return [user for user in users if user.get("id") in member_ids]
+
+
+@router.post("/api/projects/{project_id}/members", status_code=201)
+def add_project_member(project_id: str, payload: AddMemberRequest):
+    _project_or_404(project_id)
+    _user_or_404(payload.user_id)
+
+    projects = read_json("projects.json")
+    users = read_json("users.json")
+
+    for project in projects:
+        if project.get("id") == project_id and payload.user_id not in project.get("members", []):
+            project["members"].append(payload.user_id)
+
+    for user in users:
+        if user.get("id") == payload.user_id and project_id not in user.get("project_ids", []):
+            user["project_ids"].append(project_id)
+
+    write_json("projects.json", projects)
+    write_json("users.json", users)
+
+    updated_project = next(item for item in projects if item.get("id") == project_id)
+    return {"project_id": project_id, "members": updated_project.get("members", [])}
+
+
+@router.delete("/api/projects/{project_id}/members/{user_id}")
+def remove_project_member(project_id: str, user_id: str):
+    _project_or_404(project_id)
+    _user_or_404(user_id)
+
+    projects = read_json("projects.json")
+    users = read_json("users.json")
+
+    for project in projects:
+        if project.get("id") == project_id:
+            project["members"] = [mid for mid in project.get("members", []) if mid != user_id]
+
+    for user in users:
+        if user.get("id") == user_id:
+            user["project_ids"] = [pid for pid in user.get("project_ids", []) if pid != project_id]
+
+    write_json("projects.json", projects)
+    write_json("users.json", users)
+    return {"removed": True}

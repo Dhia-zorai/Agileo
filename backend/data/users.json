@@ -1,0 +1,35 @@
+[
+  {
+    "id": "user-alice",
+    "name": "Alice Martin",
+    "email": "alice.martin@agileo.app",
+    "avatar_color": "#7c3aed",
+    "role": "SCRUM_MASTER",
+    "project_ids": [
+      "project-agileo",
+      "project-ecommerce"
+    ]
+  },
+  {
+    "id": "user-bob",
+    "name": "Bob Chen",
+    "email": "bob.chen@agileo.app",
+    "avatar_color": "#3b82f6",
+    "role": "DEVELOPER",
+    "project_ids": [
+      "project-agileo",
+      "project-ecommerce"
+    ]
+  },
+  {
+    "id": "user-carol",
+    "name": "Carol Dupont",
+    "email": "carol.dupont@agileo.app",
+    "avatar_color": "#f97316",
+    "role": "PRODUCT_OWNER",
+    "project_ids": [
+      "project-agileo",
+      "project-ecommerce"
+    ]
+  }
+]
