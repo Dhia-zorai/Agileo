@@ -641,6 +641,7 @@ function KanbanBoard({ tasks, columns, onDragEnd, onAddTask, onTaskEdit, onTaskD
           )}
         </div>
       ))}
+      </div>
     </div>
   )
 }
