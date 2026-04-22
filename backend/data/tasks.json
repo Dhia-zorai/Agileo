@@ -7,7 +7,7 @@
     "title": "US2 - Invite Members",
     "description": "Invite members to the project to group all participants in one workspace.",
     "assignee_id": "user-dhia",
-    "status": "DONE",
+    "status": "IN_REVIEW",
     "priority": "HIGH",
     "due_date": "2026-04-21",
     "sort_order": 0
@@ -18,7 +18,7 @@
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
     "title": "US3 - Create Tasks",
-    "description": "Create tasks to structure the work that needs to be done.",
+    "description": "Create tasks to structure the work that needs to be ",
     "assignee_id": "user-dhia",
     "status": "IN_PROGRESS",
     "priority": "HIGH",

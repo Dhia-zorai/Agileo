@@ -720,7 +720,7 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
   }
 
   const getPriorityLabel = (p) => {
-    return p === 'HIGH' ? t('priority.high') : p === 'MEDIUM' ? t('priority.medium') : t('priority.low')
+    return p === 'HIGH' ? 'Urgente' : p === 'MEDIUM' ? 'Importante' : 'Normale'
   }
 
   return (
@@ -793,8 +793,8 @@ function BacklogView({ projectId }) {
           <div key={story.id} style={{ padding: 12, borderRadius: 12, background: '#f9fafb', borderLeft: '3px solid #7c3aed' }}>
             <div style={{ fontWeight: 500, marginBottom: 4 }}>En tant que {story.as_a}, je veux {story.i_want}, afin de {story.so_that}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: story.priority === 'MUST' ? '#fef2f2' : '#fff7ed', color: story.priority === 'MUST' ? '#ef4444' : '#f97316' }}>
-                {t(`priority.${story.priority.toLowerCase()}`)}
+              <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: story.priority === 'MUST' ? '#fef2f2' : story.priority === 'SHOULD' ? '#fff7ed' : '#f3f4f6', color: story.priority === 'MUST' ? '#ef4444' : story.priority === 'SHOULD' ? '#f97316' : '#6b7280' }}>
+                {t(`priority.${story.priority}`)}
               </span>
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: '#f3f4f6', color: '#6b7280' }}>
                 {story.story_points} pts
@@ -915,7 +915,7 @@ function MyTasksView() {
             <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{task.description}</div>
             <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#9ca3af' }}>
               <span>{getProjectName(task.project_id)}</span>
-              <span>{t(`priority.${task.priority}`)}</span>
+              <span>{task.priority === 'HIGH' ? 'Urgente' : task.priority === 'MEDIUM' ? 'Importante' : 'Normale'}</span>
               {task.due_date && <span>{t('task.dueDate')}: {new Date(task.due_date).toLocaleDateString()}</span>}
             </div>
           </div>
@@ -1125,15 +1125,15 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.priority')}</label>
-              <p style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>{t('priority.HIGH')}</p>
+              <p style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>Urgente - À faire immédiatement</p>
               <select
                 className="form-input"
                 value={taskForm.priority || 'MEDIUM'}
                 onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
               >
-                <option value="HIGH">{t('priority.high')}</option>
-                <option value="MEDIUM">{t('priority.medium')}</option>
-                <option value="LOW">{t('priority.low')}</option>
+                <option value="HIGH">Urgente</option>
+                <option value="MEDIUM">Importante</option>
+                <option value="LOW">Normale</option>
               </select>
             </div>
             <div style={{ marginBottom: 16 }}>

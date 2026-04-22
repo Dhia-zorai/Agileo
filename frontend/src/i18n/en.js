@@ -52,9 +52,13 @@ export const en = {
     high: 'Urgent',
     medium: 'Important',
     low: 'Normal',
-    HIGH: '🔴 Urgent - Do immediately',
-    MEDIUM: '🟠 Important - Do this week',
-    LOW: '🔵 Normal - Can wait'
+    HIGH: 'Urgent - Do immediately',
+    MEDIUM: 'Important - Do this week',
+    LOW: 'Normal - Can wait',
+    MUST: 'Must have',
+    SHOULD: 'Should have',
+    COULD: 'Could have',
+    WONT: "Won't have"
   },
   status: {
     TODO: 'To Do',
