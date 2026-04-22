@@ -11,8 +11,16 @@ from routers import messages as messages_router
 from seed import seed_all
 
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Seed data on startup if files are absent or empty
+    seed_all()
+    yield
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="Agileo API")
+    app = FastAPI(title="Agileo API", lifespan=lifespan)
 
     # CORS for development
     app.add_middleware(
@@ -29,11 +37,6 @@ def create_app() -> FastAPI:
     app.include_router(stories_router.router)
     app.include_router(tasks_router.router)
     app.include_router(messages_router.router)
-
-    @app.on_event("startup")
-    async def _startup():
-        # Seed data on startup if files are absent or empty
-        seed_all()
 
     return app
 
