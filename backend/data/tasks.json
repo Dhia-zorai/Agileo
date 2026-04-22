@@ -5,7 +5,7 @@
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
     "title": "US2 - Invite Members",
-    "description": "Invite members to the project to group all participants in one workspace",
+    "description": "Invite members to the project to group all participants in one workspace.",
     "assignee_id": "user-dhia",
     "status": "DONE",
     "priority": "HIGH",
@@ -46,7 +46,7 @@
     "title": "US5 - Modify Task Status",
     "description": "Change the state of a task to provide real-time tracking.",
     "assignee_id": "user-amine",
-    "status": "IN_REVIEW",
+    "status": "TODO",
     "priority": "MEDIUM",
     "due_date": "2026-04-25",
     "sort_order": 3
@@ -73,7 +73,7 @@
     "description": "Use dedicated chat or discussion space.",
     "assignee_id": "user-carol",
     "status": "TODO",
-    "priority": "MEDIUM",
+    "priority": "LOW",
     "due_date": "2026-04-27",
     "sort_order": 5
   },
@@ -85,7 +85,7 @@
     "title": "US8 - File Sharing",
     "description": "Upload and share files related to tasks.",
     "assignee_id": "user-carol",
-    "status": "IN_REVIEW",
+    "status": "TODO",
     "priority": "LOW",
     "due_date": "2026-04-28",
     "sort_order": 6

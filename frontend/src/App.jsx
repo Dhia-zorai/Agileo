@@ -7,6 +7,7 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState(null)
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
   const [, forceUpdate] = useState(0)
+  const [taskRefreshKey, setTaskRefreshKey] = useState(0)
 
   useEffect(() => {
     fetchProjects()
@@ -116,6 +117,17 @@ export default function App() {
     }
   }
 
+  const handleTaskEdit = (task) => {
+    openSlidePanel({
+      type: 'taskForm',
+      editData: task,
+      onSave: async (data) => {
+        await handleTaskUpdate(task.id, data)
+        setTaskRefreshKey(k => k + 1)
+      }
+    })
+  }
+
   const handleTaskDelete = async (id) => {
     if (confirm(t('task.deleteConfirm'))) {
       await fetch(`/api/tasks/${id}`, {
@@ -182,18 +194,12 @@ export default function App() {
             project={selectedProject}
             onBack={() => { setView('dashboard'); setSelectedProject(null) }}
             onTaskCreate={(projectId, sprintId, data) => handleTaskCreate(projectId, sprintId, data)}
-            onTaskEdit={async (task) => openSlidePanel({
-              type: 'taskForm',
-              editData: task,
-              onSave: async (data) => {
-                await handleTaskUpdate(task.id, data)
-                // The ProjectDetailView will refetch due to its own logic or we can trigger it
-              }
-            })}
+onTaskEdit={handleTaskEdit}
             onTaskDelete={handleTaskDelete}
             onInviteMember={(projectId, userId) => handleInviteMember(projectId, userId)}
             onRemoveMember={(projectId, userId) => handleRemoveMember(projectId, userId)}
             openSlidePanel={openSlidePanel}
+            taskRefreshKey={taskRefreshKey}
           />
         )}
 
@@ -458,7 +464,7 @@ function ProjectProgress({ projectId, tasks }) {
   )
 }
 
-function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel }) {
+function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel, taskRefreshKey }) {
   const [sprints, setSprints] = useState([])
   const [tasks, setTasks] = useState([])
   const [members, setMembers] = useState([])
@@ -492,7 +498,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
 
   useEffect(() => {
     fetchTasks()
-  }, [activeSprint])
+  }, [activeSprint, taskRefreshKey])
 
   const handleTaskAction = async (action, ...args) => {
     await action(...args)
@@ -785,7 +791,7 @@ function BacklogView({ projectId }) {
       <div style={{ display: 'grid', gap: 12 }}>
         {stories.map(story => (
           <div key={story.id} style={{ padding: 12, borderRadius: 12, background: '#f9fafb', borderLeft: '3px solid #7c3aed' }}>
-            <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('story.asA')} {story.as_a}, {t('story.iWant')} {story.i_want}, {t('story.soThat')} {story.so_that}</div>
+            <div style={{ fontWeight: 500, marginBottom: 4 }}>En tant que {story.as_a}, je veux {story.i_want}, afin de {story.so_that}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: story.priority === 'MUST' ? '#fef2f2' : '#fff7ed', color: story.priority === 'MUST' ? '#ef4444' : '#f97316' }}>
                 {t(`priority.${story.priority.toLowerCase()}`)}
