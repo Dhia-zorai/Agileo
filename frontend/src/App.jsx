@@ -794,7 +794,7 @@ function BacklogView({ projectId }) {
             <div style={{ fontWeight: 500, marginBottom: 4 }}>En tant que {story.as_a}, je veux {story.i_want}, afin de {story.so_that}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: story.priority === 'MUST' ? '#fef2f2' : story.priority === 'SHOULD' ? '#fff7ed' : '#f3f4f6', color: story.priority === 'MUST' ? '#ef4444' : story.priority === 'SHOULD' ? '#f97316' : '#6b7280' }}>
-                {t(`priority.${story.priority}`)}
+                {story.priority}
               </span>
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: '#f3f4f6', color: '#6b7280' }}>
                 {story.story_points} pts
