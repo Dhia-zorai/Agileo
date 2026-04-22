@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from models import AddMemberRequest, UserCreate
+from models import AddMemberRequest, UserCreate, UserUpdate
 from storage import generate_id, read_json, write_json
 
 
@@ -42,6 +42,39 @@ def create_user(payload: UserCreate):
     users.append(new_user)
     write_json("users.json", users)
     return new_user
+
+
+@router.put("/api/users/{user_id}")
+def update_user(user_id: str, payload: UserUpdate):
+    _user_or_404(user_id)
+    users = read_json("users.json")
+    for user in users:
+        if user.get("id") == user_id:
+            user["name"] = payload.name
+            user["email"] = payload.email
+            user["avatar_color"] = payload.avatar_color
+            user["role"] = payload.role.value
+            user["project_ids"] = payload.project_ids
+            write_json("users.json", users)
+            return user
+    raise HTTPException(status_code=404, detail="User not found")
+
+
+@router.delete("/api/users/{user_id}")
+def delete_user(user_id: str):
+    _user_or_404(user_id)
+    users = read_json("users.json")
+    users = [u for u in users if u.get("id") != user_id]
+    write_json("users.json", users)
+    
+    # Also remove user from projects
+    projects = read_json("projects.json")
+    for project in projects:
+        if user_id in project.get("members", []):
+            project["members"] = [mid for mid in project.get("members", []) if mid != user_id]
+    write_json("projects.json", projects)
+    
+    return {"deleted": True}
 
 
 @router.get("/api/projects/{project_id}/members")

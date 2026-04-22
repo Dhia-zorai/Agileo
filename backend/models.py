@@ -84,6 +84,10 @@ class UserCreate(UserBase):
     project_ids: list[str] = Field(default_factory=list)
 
 
+class UserUpdate(UserBase):
+    project_ids: list[str] = Field(default_factory=list)
+
+
 class User(UserBase):
     id: str
     project_ids: list[str]

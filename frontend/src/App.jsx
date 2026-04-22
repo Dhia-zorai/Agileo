@@ -16,7 +16,7 @@ export default function App() {
   
   const fetchProjects = async () => {
     try {
-      const data = await fetch('http://localhost:8000/api/projects').then(r => r.json())
+      const data = await fetch('/api/projects').then(r => r.json())
       setProjects(data)
     } catch (e) {
       console.error(e)
@@ -28,7 +28,7 @@ export default function App() {
   
   // CRUD: Projects
   const handleProjectCreate = async (data) => {
-    await fetch('http://localhost:8000/api/projects', {
+    await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, status: 'ACTIVE', members: [], sprint_ids: [] })
@@ -38,7 +38,7 @@ export default function App() {
   }
   
   const handleProjectEdit = async (id, data) => {
-    await fetch(`http://localhost:8000/api/projects/${id}`, {
+    await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -52,7 +52,7 @@ export default function App() {
   
   const handleProjectDelete = async (id) => {
     if (!confirm(t('project.deleteConfirm'))) return
-    await fetch(`http://localhost:8000/api/projects/${id}`, { method: 'DELETE' })
+    await fetch(`/api/projects/${id}`, { method: 'DELETE' })
     fetchProjects()
     setSelectedProject(null)
     setView('dashboard')
@@ -60,7 +60,7 @@ export default function App() {
   
   // CRUD: Tasks
   const handleTaskCreate = async (projectId, sprintId, data) => {
-    await fetch(`http://localhost:8000/api/sprints/${sprintId}/tasks`, {
+    await fetch(`/api/sprints/${sprintId}/tasks`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, project_id: projectId, sprint_id: sprintId })
@@ -69,7 +69,7 @@ export default function App() {
   }
   
   const handleTaskEdit = async (taskId, data) => {
-    await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+    await fetch(`/api/tasks/${taskId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -78,13 +78,13 @@ export default function App() {
   }
   
   const handleTaskDelete = async (taskId) => {
-    await fetch(`http://localhost:8000/api/tasks/${taskId}`, { method: 'DELETE' })
+    await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
     closeSlidePanel()
   }
   
   // CRUD: Members
   const handleInviteMember = async (projectId, userId) => {
-    await fetch(`http://localhost:8000/api/projects/${projectId}/members`, {
+    await fetch(`/api/projects/${projectId}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })
@@ -93,7 +93,7 @@ export default function App() {
   }
   
   const handleRemoveMember = async (projectId, userId) => {
-    await fetch(`http://localhost:8000/api/projects/${projectId}/members/${userId}`, {
+    await fetch(`/api/projects/${projectId}/members/${userId}`, {
       method: 'DELETE'
     })
     closeSlidePanel()
@@ -146,7 +146,42 @@ export default function App() {
         )}
         
         {view === 'my-tasks' && <MyTasksView />}
-        {view === 'team' && <TeamView />}
+        {view === 'team' && (
+          <TeamView 
+            openSlidePanel={openSlidePanel} 
+            onDelete={async (id) => {
+              if (confirm(t('project.deleteConfirm'))) {
+                await fetch(`/api/users/${id}`, { method: 'DELETE' })
+                forceUpdate(n => n + 1)
+              }
+            }}
+            onEdit={(user) => openSlidePanel({ 
+              type: 'userForm', 
+              editData: user,
+              onSave: async (data) => {
+                await fetch(`/api/users/${user.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data)
+                })
+                closeSlidePanel()
+                forceUpdate(n => n + 1)
+              }
+            })}
+            onAdd={() => openSlidePanel({
+              type: 'userForm',
+              onSave: async (data) => {
+                await fetch('/api/users', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data)
+                })
+                closeSlidePanel()
+                forceUpdate(n => n + 1)
+              }
+            })}
+          />
+        )}
       </div>
       
       {/* Slide Panel */}
@@ -240,7 +275,7 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
   const [tasks, setTasks] = useState([])
   
   useEffect(() => {
-    fetch('http://localhost:8000/api/tasks').then(r => r.json()).then(setTasks)
+    fetch('/api/tasks').then(r => r.json()).then(setTasks)
   }, [])
   
   useEffect(() => {
@@ -289,6 +324,7 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
         {projects.map(p => (
           <div 
             key={p.id}
+            onClick={() => onProjectClick(p)}
             style={{ 
               padding: 20, 
               borderRadius: 20, 
@@ -368,22 +404,22 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   const [activeTab, setActiveTab] = useState('board')
   
   useEffect(() => {
-    fetch(`http://localhost:8000/api/projects/${project.id}/sprints`).then(r => r.json()).then(setSprints)
-    fetch(`http://localhost:8000/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
+    fetch(`/api/projects/${project.id}/sprints`).then(r => r.json()).then(setSprints)
+    fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
   }, [project.id])
   
   const activeSprint = sprints.find(s => s.status === 'ACTIVE')
   
   useEffect(() => {
     if (activeSprint) {
-      fetch(`http://localhost:8000/api/sprints/${activeSprint.id}/tasks`)
+      fetch(`/api/sprints/${activeSprint.id}/tasks`)
         .then(r => r.json())
         .then(setTasks)
     }
   }, [activeSprint])
   
   const handleDragEnd = async (taskId, newStatus) => {
-    await fetch(`http://localhost:8000/api/tasks/${taskId}/status`, {
+    await fetch(`/api/tasks/${taskId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
@@ -641,7 +677,7 @@ function BacklogView({ projectId }) {
   const [stories, setStories] = useState([])
   
   useEffect(() => {
-    fetch(`http://localhost:8000/api/projects/${projectId}/stories`)
+    fetch(`/api/projects/${projectId}/stories`)
       .then(r => r.json())
       .then(setStories)
   }, [projectId])
@@ -720,8 +756,8 @@ function MyTasksView() {
   const [projects, setProjects] = useState([])
   
   useEffect(() => {
-    fetch('http://localhost:8000/api/tasks?assignee_id=user-alice').then(r => r.json()).then(setTasks)
-    fetch('http://localhost:8000/api/projects').then(r => r.json()).then(setProjects)
+    fetch('/api/tasks?assignee_id=user-alice').then(r => r.json()).then(setTasks)
+    fetch('/api/projects').then(r => r.json()).then(setProjects)
   }, [])
   
   const getProjectName = (id) => projects.find(p => p.id === id)?.name || id
@@ -791,19 +827,50 @@ function MyTasksView() {
   )
 }
 
-function TeamView() {
+function TeamView({ openSlidePanel, onAdd, onEdit, onDelete }) {
   const [members, setMembers] = useState([])
   
   useEffect(() => {
-    fetch('http://localhost:8000/api/users').then(r => r.json()).then(setMembers)
+    fetch('/api/users').then(r => r.json()).then(setMembers)
   }, [])
   
   return (
     <div>
-      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>{t('nav.team')}</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600 }}>{t('nav.team')}</h2>
+        <button 
+          onClick={onAdd}
+          style={{
+            padding: '8px 16px',
+            borderRadius: 999,
+            background: '#111827',
+            color: '#fff',
+            border: 'none',
+            fontSize: 14,
+            fontWeight: 500,
+            cursor: 'pointer'
+          }}
+        >
+          + {t('actions.invite')}
+        </button>
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {members.map(member => (
-          <div key={member.id} style={{ padding: 20, borderRadius: 20, background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+          <div key={member.id} style={{ padding: 20, borderRadius: 20, background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4 }}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onEdit(member); }}
+                style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
+              >
+                ✏️
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onDelete(member.id); }}
+                style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
+              >
+                🗑️
+              </button>
+            </div>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: member.avatar_color, margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 20 }}>
               {member.name.split(' ').map(n => n[0]).join('')}
             </div>
@@ -824,10 +891,13 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
   
   useEffect(() => {
     if (content?.type === 'inviteMember') {
-      fetch('http://localhost:8000/api/users').then(r => r.json()).then(setUsers)
+      fetch('/api/users').then(r => r.json()).then(setUsers)
     }
     if (content?.type === 'taskForm' && content.editData) {
       setTaskForm(content.editData)
+    }
+    if (content?.type === 'userForm' && content.editData) {
+      setFormData(content.editData)
     }
   }, [content])
   
@@ -838,6 +908,8 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
       content.onSave(taskForm)
     } else if (content?.type === 'inviteMember') {
       content.onSave(formData.user_id)
+    } else if (content?.type === 'userForm') {
+      content.onSave(formData)
     }
   }
   
@@ -849,6 +921,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
           <h2 style={{ fontSize: 18, fontWeight: 600 }}>
             {content?.type === 'projectForm' ? content?.editData ? t('project.edit') : t('project.new') : 
              content?.type === 'taskForm' ? content?.editData ? t('task.edit') : t('task.new') : 
+             content?.type === 'userForm' ? content?.editData ? t('actions.edit') : t('actions.invite') :
              t('project.invite')}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>×</button>
@@ -984,6 +1057,77 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
               }}
             >
               {content?.editData ? t('actions.save') : t('task.create')}
+            </button>
+          </div>
+        )}
+        
+        {/* User Form */}
+        {content?.type === 'userForm' && (
+          <div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('project.members')}</label>
+              <input 
+                className="form-input"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Name"
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Email</label>
+              <input 
+                className="form-input"
+                value={formData.email || ''}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="Email"
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Role</label>
+              <select 
+                className="form-input"
+                value={formData.role || 'DEVELOPER'}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              >
+                <option value="SCRUM_MASTER">Scrum Master</option>
+                <option value="PRODUCT_OWNER">Product Owner</option>
+                <option value="DEVELOPER">Developer</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Color</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {['#7c3aed', '#3b82f6', '#f97316', '#10b981', '#ec4899'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setFormData({ ...formData, avatar_color: color })}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      background: color,
+                      border: formData.avatar_color === color ? '3px solid #111827' : 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <button 
+              onClick={handleSubmit}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: 12,
+                background: '#111827',
+                color: '#fff',
+                border: 'none',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {content?.editData ? t('actions.save') : t('actions.invite')}
             </button>
           </div>
         )}
