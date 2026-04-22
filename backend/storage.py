@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 from pathlib import Path
 from threading import Lock
 from uuid import uuid4
@@ -6,6 +8,20 @@ from uuid import uuid4
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
+
+# Vercel fix: Use /tmp for data storage since the deployment dir is read-only
+if os.environ.get("VERCEL"):
+    DATA_DIR = Path("/tmp/data")
+    if not DATA_DIR.exists():
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        # Copy initial data from original location if it exists
+        ORIGINAL_DATA_DIR = BASE_DIR / "data"
+        if ORIGINAL_DATA_DIR.exists():
+            for f in ORIGINAL_DATA_DIR.glob("*.json"):
+                shutil.copy(f, DATA_DIR / f.name)
+else:
+    DATA_DIR = BASE_DIR / "data"
+
 _LOCK = Lock()
 
 
