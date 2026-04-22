@@ -986,6 +986,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
   const [formData, setFormData] = useState({})
   const [users, setUsers] = useState([])
   const [taskForm, setTaskForm] = useState({ priority: 'MEDIUM', status: 'TODO' })
+  const [stories, setStories] = useState([])
 
   useEffect(() => {
     if (content?.type === 'inviteMember') {
@@ -994,7 +995,18 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
     if (content?.type === 'taskForm' && content.editData) {
       setTaskForm(content.editData)
     } else if (content?.type === 'taskForm') {
-      setTaskForm({ priority: 'MEDIUM', status: 'TODO' })
+      setTaskForm({
+        title: '',
+        description: '',
+        story_id: '',
+        project_id: content?.projectId || '',
+        sprint_id: content?.sprintId || '',
+        priority: 'MEDIUM',
+        status: 'TODO'
+      })
+      if (content?.projectId) {
+        fetch(`/api/projects/${content.projectId}/stories`).then(r => r.json()).then(setStories)
+      }
     }
     
     if ((content?.type === 'userForm' || content?.type === 'projectForm') && content.editData) {
@@ -1112,6 +1124,19 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
                 onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
                 placeholder={t('task.title')}
               />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>User Story</label>
+              <select
+                className="form-input"
+                value={taskForm.story_id || ''}
+                onChange={(e) => setTaskForm({ ...taskForm, story_id: e.target.value })}
+              >
+                <option value="">Aucune</option>
+                {stories.map(s => (
+                  <option key={s.id} value={s.id}>{s.i_want}</option>
+                ))}
+              </select>
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.description')}</label>

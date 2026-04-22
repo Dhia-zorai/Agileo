@@ -139,22 +139,21 @@ class Story(StoryBase):
 
 
 class TaskBase(BaseModel):
-    title: str
-    description: str
+    title: str = ''
+    description: str = ''
     assignee_id: str | None = None
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
     due_date: date | None = None
     sort_order: int = 0
+    story_id: str | None = None
 
 
 class TaskCreate(TaskBase):
-    story_id: str
     project_id: str
 
 
 class TaskUpdate(TaskBase):
-    story_id: str
     sprint_id: str
     project_id: str
 
