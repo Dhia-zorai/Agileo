@@ -28,39 +28,46 @@ export default function App() {
   
   // CRUD: Projects
   const handleProjectCreate = async (data) => {
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        name: data.name || 'New Project',
-        description: data.description || '',
-        color: data.color || '#7c3aed',
-        icon: data.icon || 'PJ',
-        status: 'ACTIVE', 
-        members: [], 
-        sprint_ids: [] 
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: data.name || 'New Project',
+          description: data.description || '',
+          color: data.color || '#7c3aed',
+          icon: data.icon || 'PJ',
+          status: 'ACTIVE', 
+          members: [], 
+          sprint_ids: [] 
+        })
       })
-    })
-    if (!res.ok) {
-      const err = await res.json()
-      alert('Error: ' + JSON.stringify(err.detail))
-      return
+      if (!res.ok) throw new Error(await res.text())
+      await fetchProjects()
+      closeSlidePanel()
+    } catch (err) {
+      console.error(err)
+      alert('Error creating project: ' + err.message)
     }
-    fetchProjects()
-    closeSlidePanel()
   }
   
   const handleProjectUpdate = async (id, data) => {
-    await fetch(`/api/projects/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    await fetchProjects()
-    if (selectedProject?.id === id) {
-      setSelectedProject({ ...selectedProject, ...data })
+    try {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) throw new Error(await res.text())
+      await fetchProjects()
+      if (selectedProject?.id === id) {
+        setSelectedProject({ ...selectedProject, ...data })
+      }
+      closeSlidePanel()
+    } catch (err) {
+      console.error(err)
+      alert('Error updating project: ' + err.message)
     }
-    closeSlidePanel()
   }
   
   const handleProjectDelete = async (id) => {
@@ -73,22 +80,35 @@ export default function App() {
   
   // CRUD: Tasks
   const handleTaskCreate = async (projectId, sprintId, data) => {
-    await fetch(`/api/sprints/${sprintId}/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, project_id: projectId, sprint_id: sprintId })
-    })
-    closeSlidePanel()
+    try {
+      const res = await fetch(`/api/sprints/${sprintId}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, project_id: projectId, sprint_id: sprintId })
+      })
+      if (!res.ok) throw new Error(await res.text())
+      await fetchProjects()
+      closeSlidePanel()
+    } catch (err) {
+      console.error(err)
+      alert('Error creating task: ' + err.message)
+    }
   }
   
   const handleTaskUpdate = async (id, data) => {
-    await fetch(`/api/tasks/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    await fetchProjects()
-    closeSlidePanel()
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) throw new Error(await res.text())
+      await fetchProjects()
+      closeSlidePanel()
+    } catch (err) {
+      console.error(err)
+      alert('Error updating task: ' + err.message)
+    }
   }
   
   const handleTaskDelete = async (id) => {
@@ -1240,7 +1260,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             justify-content: space-between;
           }
           .stats-grid {
-            grid-template_columns: 1fr !important;
+            grid-template-columns: 1fr !important;
           }
           .projects-grid {
             grid-template-columns: 1fr !important;
