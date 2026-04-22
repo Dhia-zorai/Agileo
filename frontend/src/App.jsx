@@ -7,39 +7,44 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState(null)
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
   const [, forceUpdate] = useState(0)
-  
+
   useEffect(() => {
     fetchProjects()
   }, [])
-  
+
   const refreshLang = () => forceUpdate(n => n + 1)
-  
+
   const fetchProjects = async () => {
     try {
-      const data = await fetch('/api/projects').then(r => r.json())
-      setProjects(data)
+      const res = await fetch('/api/projects')
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setProjects(data)
+      } else {
+        console.error('Invalid projects data:', data)
+      }
     } catch (e) {
       console.error(e)
     }
   }
-  
+
   const openSlidePanel = (content) => setSlidePanel({ open: true, content })
   const closeSlidePanel = () => setSlidePanel({ open: false, content: null })
-  
+
   // CRUD: Projects
   const handleProjectCreate = async (data) => {
     try {
       const res = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           name: data.name || 'New Project',
           description: data.description || '',
           color: data.color || '#7c3aed',
           icon: data.icon || 'PJ',
-          status: 'ACTIVE', 
-          members: [], 
-          sprint_ids: [] 
+          status: 'ACTIVE',
+          members: [],
+          sprint_ids: []
         })
       })
       if (!res.ok) throw new Error(await res.text())
@@ -50,7 +55,7 @@ export default function App() {
       alert('Error creating project: ' + err.message)
     }
   }
-  
+
   const handleProjectUpdate = async (id, data) => {
     try {
       const res = await fetch(`/api/projects/${id}`, {
@@ -69,7 +74,7 @@ export default function App() {
       alert('Error updating project: ' + err.message)
     }
   }
-  
+
   const handleProjectDelete = async (id) => {
     if (!confirm(t('project.deleteConfirm'))) return
     await fetch(`/api/projects/${id}`, { method: 'DELETE' })
@@ -77,7 +82,7 @@ export default function App() {
     setSelectedProject(null)
     setView('dashboard')
   }
-  
+
   // CRUD: Tasks
   const handleTaskCreate = async (projectId, sprintId, data) => {
     try {
@@ -94,7 +99,7 @@ export default function App() {
       alert('Error creating task: ' + err.message)
     }
   }
-  
+
   const handleTaskUpdate = async (id, data) => {
     try {
       const res = await fetch(`/api/tasks/${id}`, {
@@ -110,7 +115,7 @@ export default function App() {
       alert('Error updating task: ' + err.message)
     }
   }
-  
+
   const handleTaskDelete = async (id) => {
     if (confirm(t('task.deleteConfirm'))) {
       await fetch(`/api/tasks/${id}`, {
@@ -119,7 +124,7 @@ export default function App() {
       await fetchProjects()
     }
   }
-  
+
   // CRUD: Members
   const handleInviteMember = async (projectId, userId) => {
     await fetch(`/api/projects/${projectId}/members`, {
@@ -130,7 +135,7 @@ export default function App() {
     fetchProjects() // Refresh global project member counts
     closeSlidePanel()
   }
-  
+
   const handleRemoveMember = async (projectId, userId) => {
     await fetch(`/api/projects/${projectId}/members/${userId}`, {
       method: 'DELETE'
@@ -138,42 +143,42 @@ export default function App() {
     fetchProjects() // Refresh global project member counts
     closeSlidePanel()
   }
-  
+
   // Language toggle
   const handleLangToggle = () => {
     toggleLang()
     refreshLang()
   }
-  
+
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: '#e8e8ed',
       fontFamily: "'Plus Jakarta Sans', sans-serif"
     }}>
       <div className="container" style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px' }}>
-        
+
         {/* Header */}
-        <Header 
-          view={view} 
-          setView={setView} 
+        <Header
+          view={view}
+          setView={setView}
           onNewProject={() => openSlidePanel({ type: 'projectForm', onSave: handleProjectCreate })}
           onLangToggle={handleLangToggle}
         />
-        
+
         {/* Main Content */}
         {view === 'dashboard' && (
-          <DashboardView 
-            projects={projects} 
+          <DashboardView
+            projects={projects}
             onProjectClick={(p) => { setSelectedProject(p); setView('project') }}
             onNewProject={() => openSlidePanel({ type: 'projectForm', onSave: handleProjectCreate })}
             onEdit={(p) => openSlidePanel({ type: 'projectForm', onSave: (data) => handleProjectUpdate(p.id, data), editData: p })}
             onDelete={(id) => handleProjectDelete(id)}
           />
         )}
-        
+
         {view === 'project' && selectedProject && (
-          <ProjectDetailView 
+          <ProjectDetailView
             project={selectedProject}
             onBack={() => { setView('dashboard'); setSelectedProject(null) }}
             onTaskCreate={(projectId, sprintId, data) => handleTaskCreate(projectId, sprintId, data)}
@@ -191,19 +196,19 @@ export default function App() {
             openSlidePanel={openSlidePanel}
           />
         )}
-        
+
         {view === 'my-tasks' && <MyTasksView />}
         {view === 'team' && (
-          <TeamView 
-            openSlidePanel={openSlidePanel} 
+          <TeamView
+            openSlidePanel={openSlidePanel}
             onDelete={async (id) => {
               if (confirm(t('project.deleteConfirm'))) {
                 await fetch(`/api/users/${id}`, { method: 'DELETE' })
                 forceUpdate(n => n + 1)
               }
             }}
-            onEdit={(user) => openSlidePanel({ 
-              type: 'userForm', 
+            onEdit={(user) => openSlidePanel({
+              type: 'userForm',
               editData: user,
               onSave: async (data) => {
                 await fetch(`/api/users/${user.id}`, {
@@ -230,10 +235,10 @@ export default function App() {
           />
         )}
       </div>
-      
+
       {/* Slide Panel */}
-      <SlidePanel 
-        isOpen={slidePanel.open} 
+      <SlidePanel
+        isOpen={slidePanel.open}
         onClose={closeSlidePanel}
         content={slidePanel.content}
         projects={projects}
@@ -249,7 +254,7 @@ function Header({ view, setView, onNewProject, onLangToggle }) {
         <h1 style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 700, marginBottom: 4 }}>{t('app.title')}</h1>
         <p style={{ fontSize: 13, color: '#6b7280' }}>{t('app.subtitle')}</p>
       </div>
-      
+
       <div className="nav-tabs" style={{ display: 'flex', gap: 4, background: '#fff', padding: 4, borderRadius: 999, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflowX: 'auto' }}>
         {[
           { id: 'dashboard', label: t('nav.dashboard') },
@@ -274,9 +279,9 @@ function Header({ view, setView, onNewProject, onLangToggle }) {
           </button>
         ))}
       </div>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button 
+        <button
           onClick={onLangToggle}
           title="Langue / Language"
           style={{
@@ -294,7 +299,7 @@ function Header({ view, setView, onNewProject, onLangToggle }) {
         >
           {getCurrentLang() === 'fr' ? '🇫🇷' : '🇬🇧'}
         </button>
-        <button 
+        <button
           onClick={onNewProject}
           style={{
             padding: '10px 16px',
@@ -320,24 +325,33 @@ function Header({ view, setView, onNewProject, onLangToggle }) {
 function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelete }) {
   const [stats, setStats] = useState({ myTasks: 0, inProgress: 0, completed: 0 })
   const [tasks, setTasks] = useState([])
-  
+
   useEffect(() => {
-    fetch('/api/tasks').then(r => r.json()).then(setTasks)
+    fetch('/api/tasks')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setTasks(data)
+        } else {
+          console.error('Invalid tasks data:', data)
+        }
+      })
+      .catch(e => console.error(e))
   }, [])
-  
+
   useEffect(() => {
     const my = tasks.filter(t => t.assignee_id && t.status !== 'DONE')
     const inP = tasks.filter(t => t.status === 'IN_PROGRESS').length
     const done = tasks.filter(t => t.status === 'DONE').length
     setStats({ myTasks: my.length, inProgress: inP, completed: done })
   }, [tasks])
-  
+
   if (projects.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: 60 }}>
         <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16 }}>{t('welcome.title')}</h2>
         <p style={{ color: '#6b7280', marginBottom: 24 }}>{t('welcome.noProjects')}</p>
-        <button 
+        <button
           onClick={onNewProject}
           style={{
             padding: '12px 24px',
@@ -355,7 +369,7 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
       </div>
     )
   }
-  
+
   return (
     <div>
       {/* Stats */}
@@ -364,17 +378,17 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
         <StatCard value={stats.inProgress} label={t('stats.inProgress')} color="#f97316" />
         <StatCard value={stats.completed} label={t('stats.completed')} color="#10b981" />
       </div>
-      
+
       {/* Projects */}
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>{t('project.members')}</h2>
       <div className="projects-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
         {projects.map(p => (
-          <div 
+          <div
             key={p.id}
             onClick={() => onProjectClick(p)}
-            style={{ 
-              padding: 20, 
-              borderRadius: 20, 
+            style={{
+              padding: 20,
+              borderRadius: 20,
               background: '#fff',
               boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
               cursor: 'pointer',
@@ -391,14 +405,14 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
               </div>
               {/* Edit/Delete buttons */}
               <div style={{ display: 'flex', gap: 4 }}>
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); onEdit(p); }}
                   style={{ padding: 6, borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 12 }}
                   title={t('actions.edit')}
                 >
                   ✏️
                 </button>
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
                   style={{ padding: 6, borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 12 }}
                   title={t('actions.delete')}
@@ -430,7 +444,7 @@ function ProjectProgress({ projectId, tasks }) {
   const total = projectTasks.length
   const done = projectTasks.filter(t => t.status === 'DONE').length
   const percent = total ? (done / total) * 100 : 0
-  
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
@@ -449,7 +463,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   const [tasks, setTasks] = useState([])
   const [members, setMembers] = useState([])
   const [activeTab, setActiveTab] = useState('board')
-  
+
   const fetchMembers = () => {
     fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
   }
@@ -458,14 +472,21 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
     fetch(`/api/projects/${project.id}/sprints`).then(r => r.json()).then(setSprints)
     fetchMembers()
   }, [project.id])
-  
+
   const activeSprint = sprints.find(s => s.status === 'ACTIVE')
-  
+
   const fetchTasks = () => {
     if (activeSprint) {
       fetch(`/api/sprints/${activeSprint.id}/tasks`)
         .then(r => r.json())
-        .then(setTasks)
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTasks(data)
+          } else {
+            console.error('Invalid sprint tasks data:', data)
+          }
+        })
+        .catch(e => console.error(e))
     }
   }
 
@@ -477,7 +498,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
     await action(...args)
     fetchTasks()
   }
-  
+
   const handleDragEnd = async (taskId, newStatus) => {
     await fetch(`/api/tasks/${taskId}/status`, {
       method: 'PATCH',
@@ -486,7 +507,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
     })
     setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t))
   }
-  
+
   const handleAddTask = (columnId) => {
     openSlidePanel({
       type: 'taskForm',
@@ -501,7 +522,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       }
     })
   }
-  
+
   const handleInvite = () => {
     openSlidePanel({
       type: 'inviteMember',
@@ -513,33 +534,33 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       }
     })
   }
-  
+
   const handleRemoveMember = async (userId) => {
     if (confirm(t('project.deleteConfirm'))) {
       await onRemoveMember(project.id, userId)
       fetchMembers()
     }
   }
-  
+
   const tabs = [
     { id: 'board', label: t('tabs.board') },
     { id: 'backlog', label: t('tabs.backlog') },
     { id: 'members', label: t('tabs.members') }
   ]
-  
+
   const KANBAN_COLUMNS = [
     { id: 'TODO', label: t('status.TODO'), color: '#9ca3af' },
     { id: 'IN_PROGRESS', label: t('status.IN_PROGRESS'), color: '#f97316' },
     { id: 'IN_REVIEW', label: t('status.IN_REVIEW'), color: '#3b82f6' },
     { id: 'DONE', label: t('status.DONE'), color: '#10b981' }
   ]
-  
+
   return (
     <div>
       <button onClick={onBack} style={{ marginBottom: 16, padding: '8px 16px', borderRadius: 999, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>
         ← {t('actions.back')}
       </button>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
         <div style={{ width: 48, height: 48, borderRadius: 12, background: project.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 18 }}>
           {project.icon}
@@ -549,7 +570,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
           <p style={{ fontSize: 14, color: '#6b7280' }}>{project.description}</p>
         </div>
       </div>
-      
+
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: '#fff', padding: 4, borderRadius: 999, width: 'fit-content' }}>
         {tabs.map(tab => (
@@ -572,25 +593,25 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
           </button>
         ))}
       </div>
-      
+
       {activeTab === 'board' && (
-        <KanbanBoard 
-          tasks={tasks} 
-          columns={KANBAN_COLUMNS} 
+        <KanbanBoard
+          tasks={tasks}
+          columns={KANBAN_COLUMNS}
           onDragEnd={handleDragEnd}
           onAddTask={handleAddTask}
           onTaskEdit={(task) => handleTaskAction(onTaskEdit, task)}
           onTaskDelete={(taskId) => handleTaskAction(onTaskDelete, taskId)}
         />
       )}
-      
+
       {activeTab === 'backlog' && (
         <BacklogView projectId={project.id} />
       )}
-      
+
       {activeTab === 'members' && (
-        <MembersView 
-          members={members} 
+        <MembersView
+          members={members}
           onInvite={handleInvite}
           onRemove={handleRemoveMember}
         />
@@ -602,7 +623,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
 function KanbanBoard({ tasks, columns, onDragEnd, onAddTask, onTaskEdit, onTaskDelete }) {
   const [draggedTask, setDraggedTask] = useState(null)
   const [dragOverColumn, setDragOverColumn] = useState(null)
-  
+
   const handleDragStart = (task) => setDraggedTask(task)
   const handleDragOver = (e, columnId) => {
     e.preventDefault()
@@ -615,73 +636,73 @@ function KanbanBoard({ tasks, columns, onDragEnd, onAddTask, onTaskEdit, onTaskD
     setDraggedTask(null)
     setDragOverColumn(null)
   }
-  
+
   return (
     <div className="kanban-wrapper" style={{ overflowX: 'auto', paddingBottom: 16, margin: '0 -24px', padding: '0 24px' }}>
       <div className="kanban-board" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(280px, 1fr))', gap: 16, minWidth: 1100 }}>
-      {columns.map(col => (
-        <div
-          key={col.id}
-          onDragOver={(e) => handleDragOver(e, col.id)}
-          onDrop={() => handleDrop(col.id)}
-          style={{
-            background: dragOverColumn === col.id ? '#f3f4f6' : '#f9fafb',
-            borderRadius: 16,
-            padding: 16,
-            minHeight: 400,
-            transition: 'background 0.15s ease'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col.color }}></span>
-              <span style={{ fontWeight: 600 }}>{col.label}</span>
+        {columns.map(col => (
+          <div
+            key={col.id}
+            onDragOver={(e) => handleDragOver(e, col.id)}
+            onDrop={() => handleDrop(col.id)}
+            style={{
+              background: dragOverColumn === col.id ? '#f3f4f6' : '#f9fafb',
+              borderRadius: 16,
+              padding: 16,
+              minHeight: 400,
+              transition: 'background 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: col.color }}></span>
+                <span style={{ fontWeight: 600 }}>{col.label}</span>
+              </div>
+              <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 12, background: '#f3f4f6', color: '#6b7280' }}>
+                {tasks.filter(t => t.status === col.id).length}
+              </span>
             </div>
-            <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 12, background: '#f3f4f6', color: '#6b7280' }}>
-              {tasks.filter(t => t.status === col.id).length}
-            </span>
+
+            <div style={{ display: 'grid', gap: 12 }}>
+              {tasks.filter(t => t.status === col.id).map(task => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onDragStart={handleDragStart}
+                  isDragging={draggedTask?.id === task.id}
+                  onEdit={onTaskEdit}
+                  onDelete={onTaskDelete}
+                />
+              ))}
+            </div>
+
+            {col.id === 'TODO' && (
+              <button
+                onClick={() => onAddTask(col.id)}
+                className="add-task-btn"
+                style={{
+                  width: '100%',
+                  marginTop: 12,
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  border: 'none',
+                  background: '#111827',
+                  color: '#fff',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                }}
+              >
+                + {t('task.add')}
+              </button>
+            )}
           </div>
-          
-          <div style={{ display: 'grid', gap: 12 }}>
-            {tasks.filter(t => t.status === col.id).map(task => (
-              <TaskCard 
-                key={task.id} 
-                task={task} 
-                onDragStart={handleDragStart}
-                isDragging={draggedTask?.id === task.id}
-                onEdit={onTaskEdit}
-                onDelete={onTaskDelete}
-              />
-            ))}
-          </div>
-          
-          {col.id === 'TODO' && (
-            <button 
-              onClick={() => onAddTask(col.id)}
-              className="add-task-btn"
-              style={{
-                width: '100%',
-                marginTop: 12,
-                padding: '12px 16px',
-                borderRadius: 12,
-                border: 'none',
-                background: '#111827',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}
-            >
-              + {t('task.add')}
-            </button>
-          )}
-        </div>
-      ))}
+        ))}
       </div>
     </div>
   )
@@ -691,11 +712,11 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
   const getPriorityColor = (p) => {
     return p === 'HIGH' ? '#ef4444' : p === 'MEDIUM' ? '#f97316' : '#3b82f6'
   }
-  
+
   const getPriorityLabel = (p) => {
     return p === 'HIGH' ? t('priority.high') : p === 'MEDIUM' ? t('priority.medium') : t('priority.low')
   }
-  
+
   return (
     <div
       draggable
@@ -715,14 +736,14 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 14, flex: 1 }}>{task.title}</div>
         <div style={{ display: 'flex', gap: 4 }}>
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); onEdit(task); }}
             style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
             title={t('actions.edit')}
           >
             ✏️
           </button>
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
             style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
             title={t('actions.delete')}
@@ -746,13 +767,13 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
 
 function BacklogView({ projectId }) {
   const [stories, setStories] = useState([])
-  
+
   useEffect(() => {
     fetch(`/api/projects/${projectId}/stories`)
       .then(r => r.json())
       .then(setStories)
   }, [projectId])
-  
+
   return (
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -785,7 +806,7 @@ function MembersView({ members, onInvite, onRemove }) {
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h3 style={{ fontSize: 16, fontWeight: 600 }}>{t('tabs.members')}</h3>
-        <button 
+        <button
           onClick={onInvite}
           style={{
             padding: '8px 16px',
@@ -808,7 +829,7 @@ function MembersView({ members, onInvite, onRemove }) {
             </div>
             <div style={{ fontWeight: 600 }}>{member.name}</div>
             <div style={{ fontSize: 12, color: '#6b7280' }}>{member.role}</div>
-            <button 
+            <button
               onClick={() => onRemove(member.id)}
               style={{ marginTop: 8, padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 11 }}
             >
@@ -825,36 +846,36 @@ function MyTasksView() {
   const [tasks, setTasks] = useState([])
   const [filter, setFilter] = useState('all')
   const [projects, setProjects] = useState([])
-  
+
   useEffect(() => {
     fetch('/api/tasks?assignee_id=user-alice').then(r => r.json()).then(setTasks)
     fetch('/api/projects').then(r => r.json()).then(setProjects)
   }, [])
-  
+
   const getProjectName = (id) => projects.find(p => p.id === id)?.name || id
-  
-  const filtered = filter === 'all' ? tasks : 
-                filter === 'today' ? tasks.filter(t => t.due_date === new Date().toISOString().split('T')[0]) :
-                filter === 'week' ? tasks.filter(t => {
-                    const due = new Date(t.due_date)
-                    const now = new Date()
-                    const week = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-                    return due <= week && due >= now
-                  }) :
-                filter === 'done' ? tasks.filter(t => t.status === 'DONE') :
-                tasks
-  
+
+  const filtered = filter === 'all' ? tasks :
+    filter === 'today' ? tasks.filter(t => t.due_date === new Date().toISOString().split('T')[0]) :
+      filter === 'week' ? tasks.filter(t => {
+        const due = new Date(t.due_date)
+        const now = new Date()
+        const week = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        return due <= week && due >= now
+      }) :
+        filter === 'done' ? tasks.filter(t => t.status === 'DONE') :
+          tasks
+
   const statusColors = {
     'TODO': ['#f3f4f6', '#6b7280'],
     'IN_PROGRESS': ['#fff7ed', '#f97316'],
     'IN_REVIEW': ['#eff6ff', '#3b82f6'],
     'DONE': ['#f0fdf4', '#10b981']
   }
-  
+
   return (
     <div>
       <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>{t('nav.myTasks')}</h2>
-      
+
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, background: '#fff', padding: 4, borderRadius: 999, width: 'fit-content' }}>
         {[{ id: 'all', label: t('filter.all') }, { id: 'today', label: t('filter.today') }, { id: 'week', label: t('filter.week') }, { id: 'done', label: t('filter.done') }].map(f => (
           <button
@@ -875,7 +896,7 @@ function MyTasksView() {
           </button>
         ))}
       </div>
-      
+
       <div style={{ display: 'grid', gap: 12 }}>
         {filtered.map(task => (
           <div key={task.id} style={{ padding: 16, borderRadius: 14, background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
@@ -900,16 +921,16 @@ function MyTasksView() {
 
 function TeamView({ openSlidePanel, onAdd, onEdit, onDelete }) {
   const [members, setMembers] = useState([])
-  
+
   useEffect(() => {
     fetch('/api/users').then(r => r.json()).then(setMembers)
   }, [])
-  
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2 style={{ fontSize: 20, fontWeight: 600 }}>{t('nav.team')}</h2>
-        <button 
+        <button
           onClick={onAdd}
           style={{
             padding: '8px 16px',
@@ -929,13 +950,13 @@ function TeamView({ openSlidePanel, onAdd, onEdit, onDelete }) {
         {members.map(member => (
           <div key={member.id} style={{ padding: 20, borderRadius: 20, background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center', position: 'relative' }}>
             <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4 }}>
-              <button 
+              <button
                 onClick={(e) => { e.stopPropagation(); onEdit(member); }}
                 style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
               >
                 ✏️
               </button>
-              <button 
+              <button
                 onClick={(e) => { e.stopPropagation(); onDelete(member.id); }}
                 style={{ padding: 4, borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12 }}
               >
@@ -959,65 +980,67 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
   const [formData, setFormData] = useState({})
   const [users, setUsers] = useState([])
   const [taskForm, setTaskForm] = useState({ priority: 'MEDIUM', status: 'TODO' })
-  
+
   useEffect(() => {
     if (content?.type === 'inviteMember') {
       fetch('/api/users').then(r => r.json()).then(setUsers)
     }
     if (content?.type === 'taskForm' && content.editData) {
       setTaskForm(content.editData)
+    } else if (content?.type === 'taskForm') {
+      setTaskForm({ priority: 'MEDIUM', status: 'TODO' })
     }
-    if (content?.type === 'userForm' && content.editData) {
+    
+    if ((content?.type === 'userForm' || content?.type === 'projectForm') && content.editData) {
       setFormData(content.editData)
-    }
-    if (!content?.editData) {
+    } else if (!content?.editData) {
       setFormData({})
     }
   }, [content])
-  
+
   if (!isOpen) return null
-  
+
   const handleSubmit = () => {
     if (content?.type === 'taskForm') {
       content.onSave(taskForm)
     } else if (content?.type === 'inviteMember') {
       content.onSave(formData.user_id)
-    } else if (content?.type === 'userForm') {
+    } else if (content?.type === 'userForm' || content?.type === 'projectForm') {
       content.onSave(formData)
     }
   }
-  
+
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 999 }} />
-      <div className="slide-panel" style={{ position: 'fixed', top: 0, right: 0, width: 'min(100%, 420px)', height: '100vh', background: '#fff', zIndex: 1000, padding: 24, overflowY: 'auto', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)' }}>
+      <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 999, opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none', transition: 'opacity 0.25s ease' }} />
+      <div className="slide-panel" style={{ position: 'fixed', top: 0, right: 0, width: '420px', maxWidth: '100%', height: '100vh', background: '#fff', zIndex: 1000, padding: 24, overflowY: 'auto', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', transform: isOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600 }}>
-            {content?.type === 'projectForm' ? content?.editData ? t('project.edit') : t('project.new') : 
-             content?.type === 'taskForm' ? content?.editData ? t('task.edit') : t('task.new') : 
-             content?.type === 'userForm' ? content?.editData ? t('actions.edit') : t('actions.invite') :
-             t('project.invite')}
+            {content?.type === 'projectForm' ? content?.editData ? t('project.edit') : t('project.new') :
+              content?.type === 'taskForm' ? content?.editData ? t('task.edit') : t('task.new') :
+                content?.type === 'userForm' ? content?.editData ? t('actions.edit') : t('actions.invite') :
+                  t('project.invite')}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>×</button>
         </div>
-        
+
         {/* Project Form */}
         {content?.type === 'projectForm' && (
           <div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('project.name')}</label>
-              <input 
+              <input
                 className="form-input"
-                value={formData.name || content?.editData?.name || ''}
+                value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder={t('project.name')}
               />
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('project.description')}</label>
-              <textarea 
+              <textarea
                 className="form-input"
-                value={formData.description || content?.editData?.description || ''}
+                value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder={t('project.description')}
                 rows={3}
@@ -1036,7 +1059,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
                       height: 40,
                       borderRadius: 10,
                       background: color,
-                      border: formData.color === color || (content?.editData?.color === color && !formData.color) ? '3px solid #111827' : 'none',
+                      border: formData.color === color ? '3px solid #111827' : 'none',
                       cursor: 'pointer'
                     }}
                   />
@@ -1045,16 +1068,16 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Icon (2 lettres)</label>
-              <input 
+              <input
                 className="form-input"
-                value={formData.icon || content?.editData?.icon || ''}
+                value={formData.icon || ''}
                 onChange={(e) => setFormData({ ...formData, icon: e.target.value.toUpperCase().slice(0, 2) })}
                 placeholder="AP"
                 maxLength={2}
               />
             </div>
-            <button 
-              onClick={() => content.onSave({ ...formData, ...content?.editData })}
+            <button
+              onClick={handleSubmit}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -1071,13 +1094,13 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </button>
           </div>
         )}
-        
+
         {/* Task Form */}
         {content?.type === 'taskForm' && (
           <div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.title')}</label>
-              <input 
+              <input
                 className="form-input"
                 value={taskForm.title || ''}
                 onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
@@ -1086,7 +1109,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.description')}</label>
-              <textarea 
+              <textarea
                 className="form-input"
                 value={taskForm.description || ''}
                 onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
@@ -1097,9 +1120,9 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.priority')}</label>
               <p style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>{t('priority.HIGH')}</p>
-              <select 
+              <select
                 className="form-input"
-                value={taskForm.priority}
+                value={taskForm.priority || 'MEDIUM'}
                 onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
               >
                 <option value="HIGH">{t('priority.high')}</option>
@@ -1109,14 +1132,14 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('task.dueDate')}</label>
-              <input 
+              <input
                 type="date"
                 className="form-input"
-                value={taskForm.due_date || ''}
+                value={taskForm.due_date ? taskForm.due_date.substring(0, 10) : ''}
                 onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
               />
             </div>
-            <button 
+            <button
               onClick={handleSubmit}
               style={{
                 width: '100%',
@@ -1134,13 +1157,13 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </button>
           </div>
         )}
-        
+
         {/* User Form */}
         {content?.type === 'userForm' && (
           <div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>{t('project.members')}</label>
-              <input 
+              <input
                 className="form-input"
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -1149,7 +1172,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Email</label>
-              <input 
+              <input
                 className="form-input"
                 value={formData.email || ''}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -1158,7 +1181,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Role</label>
-              <select 
+              <select
                 className="form-input"
                 value={formData.role || 'DEVELOPER'}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
@@ -1187,7 +1210,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
                 ))}
               </div>
             </div>
-            <button 
+            <button
               onClick={handleSubmit}
               style={{
                 width: '100%',
@@ -1205,13 +1228,13 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             </button>
           </div>
         )}
-        
+
         {/* Invite Member */}
         {content?.type === 'inviteMember' && (
           <div>
             <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>{t('project.invite')}:</div>
             {users.filter(u => !content.currentMembers?.find(m => m.id === u.id)).map(user => (
-              <div 
+              <div
                 key={user.id}
                 onClick={() => content.onSave(user.id)}
                 style={{

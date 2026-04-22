@@ -1,26 +1,22 @@
 [
   {
-    "id": "user-alice",
-    "name": "Alice Martin",
-    "email": "alice.martin@agileo.app",
+    "id": "user-dhia",
+    "name": "Dhia Zorai",
+    "email": "dhia@agileo.app",
     "avatar_color": "#7c3aed",
     "role": "SCRUM_MASTER",
     "project_ids": [
-      "project-agileo",
-      "project-ecommerce",
-      "dd5da73f-cf3c-46f6-8c49-a314c0fe3b21"
+      "project-agileo"
     ]
   },
   {
-    "id": "user-bob",
-    "name": "Bob Chen",
-    "email": "bob.chen@agileo.app",
+    "id": "user-amine",
+    "name": "Amine",
+    "email": "amine@agileo.app",
     "avatar_color": "#3b82f6",
     "role": "DEVELOPER",
     "project_ids": [
-      "project-agileo",
-      "project-ecommerce",
-      "dd5da73f-cf3c-46f6-8c49-a314c0fe3b21"
+      "project-agileo"
     ]
   },
   {
@@ -29,10 +25,14 @@
     "email": "carol.dupont@agileo.app",
     "avatar_color": "#f97316",
     "role": "PRODUCT_OWNER",
-    "project_ids": [
-      "project-agileo",
-      "project-ecommerce",
-      "dd5da73f-cf3c-46f6-8c49-a314c0fe3b21"
-    ]
+    "project_ids": []
+  },
+  {
+    "id": "user-david",
+    "name": "David Smith",
+    "email": "david.smith@agileo.app",
+    "avatar_color": "#10b981",
+    "role": "DEVELOPER",
+    "project_ids": []
   }
 ]

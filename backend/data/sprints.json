@@ -2,21 +2,11 @@
   {
     "id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "name": "Agileo Sprint 4",
-    "goal": "Deliver collaborative planning and task lifecycle updates.",
+    "name": "Agileo Sprint 1",
+    "goal": "Deliver core features and team collaboration.",
     "start_date": "2026-04-18",
     "end_date": "2026-05-02",
     "capacity": 40,
-    "status": "ACTIVE"
-  },
-  {
-    "id": "sprint-ecom-1",
-    "project_id": "project-ecommerce",
-    "name": "Checkout Optimization Sprint",
-    "goal": "Improve conversion through faster checkout and clearer product cues.",
-    "start_date": "2026-04-19",
-    "end_date": "2026-05-03",
-    "capacity": 38,
     "status": "ACTIVE"
   }
 ]

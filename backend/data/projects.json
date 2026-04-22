@@ -1,62 +1,20 @@
 [
   {
     "id": "project-agileo",
-    "name": "Agileo Platform",
+    "name": "Agileo",
     "description": "Student-friendly Scrum dashboard for planning, tracking, and team delivery.",
     "color": "#7c3aed",
-    "icon": "AP",
+    "icon": "AG",
     "status": "ACTIVE",
-    "created_at": "2026-04-21T16:50:02.454589",
+    "created_at": "2026-04-21T19:38:25.786865",
     "members": [
       "user-alice",
       "user-bob",
-      "user-carol"
+      "user-dhia",
+      "user-amine"
     ],
     "sprint_ids": [
       "sprint-agileo-1"
     ]
-  },
-  {
-    "id": "project-ecommerce",
-    "name": "E-Commerce Redesign",
-    "description": "Modern storefront UX overhaul with better checkout performance.",
-    "color": "#3b82f6",
-    "icon": "EC",
-    "status": "ACTIVE",
-    "created_at": "2026-04-21T20:50:02.454589",
-    "members": [
-      "user-alice",
-      "user-bob",
-      "user-carol"
-    ],
-    "sprint_ids": [
-      "sprint-ecom-1"
-    ]
-  },
-  {
-    "id": "dd5da73f-cf3c-46f6-8c49-a314c0fe3b21",
-    "name": "dfhdf",
-    "description": "fddf",
-    "color": "#3b82f6",
-    "icon": "FD",
-    "status": "ACTIVE",
-    "created_at": "2026-04-22T18:37:07.270881",
-    "members": [
-      "user-alice",
-      "user-bob",
-      "user-carol"
-    ],
-    "sprint_ids": []
-  },
-  {
-    "id": "a12c4fce-add3-4ee4-8af7-bf5d532c5588",
-    "name": "My Project",
-    "description": "Some description",
-    "color": "#3b82f6",
-    "icon": "MP",
-    "status": "ACTIVE",
-    "created_at": "2026-04-22T18:37:14.210937",
-    "members": [],
-    "sprint_ids": []
   }
 ]

@@ -1,16 +1,5 @@
 [
   {
-    "id": "story-us1",
-    "project_id": "project-agileo",
-    "sprint_id": "sprint-agileo-1",
-    "as_a": "student",
-    "i_want": "create a project",
-    "so_that": "I can organize team work",
-    "priority": "MUST",
-    "story_points": 5,
-    "status": "IN_PROGRESS"
-  },
-  {
     "id": "story-us2",
     "project_id": "project-agileo",
     "sprint_id": "sprint-agileo-1",
@@ -19,7 +8,7 @@
     "so_that": "I can group participants",
     "priority": "MUST",
     "story_points": 3,
-    "status": "TODO"
+    "status": "DONE"
   },
   {
     "id": "story-us3",
@@ -36,55 +25,55 @@
     "id": "story-us4",
     "project_id": "project-agileo",
     "sprint_id": "sprint-agileo-1",
-    "as_a": "developer",
-    "i_want": "see my assigned tasks",
-    "so_that": "I can focus daily work",
-    "priority": "SHOULD",
-    "story_points": 5,
-    "status": "TODO"
-  },
-  {
-    "id": "story-us5",
-    "project_id": "project-ecommerce",
-    "sprint_id": "sprint-ecom-1",
-    "as_a": "scrum team",
-    "i_want": "drag tasks across board columns",
-    "so_that": "workflow status stays current",
+    "as_a": "member",
+    "i_want": "consult my tasks",
+    "so_that": "I know what to work on",
     "priority": "MUST",
-    "story_points": 8,
+    "story_points": 5,
     "status": "IN_PROGRESS"
   },
   {
+    "id": "story-us5",
+    "project_id": "project-agileo",
+    "sprint_id": "sprint-agileo-1",
+    "as_a": "member",
+    "i_want": "modify task status",
+    "so_that": "I can track progress",
+    "priority": "MUST",
+    "story_points": 3,
+    "status": "TODO"
+  },
+  {
     "id": "story-us6",
-    "project_id": "project-ecommerce",
-    "sprint_id": "sprint-ecom-1",
-    "as_a": "product owner",
-    "i_want": "track sprint burndown",
-    "so_that": "I can monitor delivery risk",
-    "priority": "SHOULD",
+    "project_id": "project-agileo",
+    "sprint_id": "sprint-agileo-1",
+    "as_a": "user",
+    "i_want": "consult progress",
+    "so_that": "I can meet deadlines",
+    "priority": "MUST",
     "story_points": 5,
     "status": "TODO"
   },
   {
     "id": "story-us7",
-    "project_id": "project-ecommerce",
-    "sprint_id": "sprint-ecom-1",
+    "project_id": "project-agileo",
+    "sprint_id": "sprint-agileo-1",
     "as_a": "team member",
-    "i_want": "chat inside a project",
-    "so_that": "I can align quickly",
-    "priority": "COULD",
+    "i_want": "team communication",
+    "so_that": "I can align with team",
+    "priority": "SHOULD",
     "story_points": 3,
     "status": "TODO"
   },
   {
     "id": "story-us8",
-    "project_id": "project-ecommerce",
-    "sprint_id": null,
-    "as_a": "stakeholder",
-    "i_want": "review velocity reports",
-    "so_that": "I can plan next sprint scope",
-    "priority": "SHOULD",
-    "story_points": 2,
-    "status": "DONE"
+    "project_id": "project-agileo",
+    "sprint_id": "sprint-agileo-1",
+    "as_a": "member",
+    "i_want": "share files",
+    "so_that": "I can centralize resources",
+    "priority": "COULD",
+    "story_points": 3,
+    "status": "TODO"
   }
 ]
