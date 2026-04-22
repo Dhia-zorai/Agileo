@@ -176,7 +176,7 @@ function BacklogView({ projectId }) {
           {stories.map(story => (
             <tr key={story.id}>
               <td>
-                <div style={{ fontWeight: 500 }}>As a {story.as_a}, I want {story.i_want}, so that {story.so_that}</div>
+                <div style={{ fontWeight: 500 }}>{t('story.asA')} {story.as_a}, {t('story.iWant')} {story.i_want}, {t('story.soThat')} {story.so_that}</div>
               </td>
               <td>
                 <span className={`badge badge-${story.priority === 'MUST' ? 'red' : story.priority === 'SHOULD' ? 'orange' : 'blue'}`}>

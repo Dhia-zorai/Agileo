@@ -785,7 +785,7 @@ function BacklogView({ projectId }) {
       <div style={{ display: 'grid', gap: 12 }}>
         {stories.map(story => (
           <div key={story.id} style={{ padding: 12, borderRadius: 12, background: '#f9fafb', borderLeft: '3px solid #7c3aed' }}>
-            <div style={{ fontWeight: 500, marginBottom: 4 }}>As a {story.as_a}, I want {story.i_want}, so that {story.so_that}</div>
+            <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('story.asA')} {story.as_a}, {t('story.iWant')} {story.i_want}, {t('story.soThat')} {story.so_that}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: story.priority === 'MUST' ? '#fef2f2' : '#fff7ed', color: story.priority === 'MUST' ? '#ef4444' : '#f97316' }}>
                 {t(`priority.${story.priority.toLowerCase()}`)}

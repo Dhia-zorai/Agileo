@@ -25,7 +25,9 @@
     "email": "carol.dupont@agileo.app",
     "avatar_color": "#f97316",
     "role": "PRODUCT_OWNER",
-    "project_ids": []
+    "project_ids": [
+      "project-agileo"
+    ]
   },
   {
     "id": "user-david",
