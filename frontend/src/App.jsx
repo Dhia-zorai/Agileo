@@ -28,11 +28,24 @@ export default function App() {
   
   // CRUD: Projects
   const handleProjectCreate = async (data) => {
-    await fetch('/api/projects', {
+    const res = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, status: 'ACTIVE', members: [], sprint_ids: [] })
+      body: JSON.stringify({ 
+        name: data.name || 'New Project',
+        description: data.description || '',
+        color: data.color || '#7c3aed',
+        icon: data.icon || 'PJ',
+        status: 'ACTIVE', 
+        members: [], 
+        sprint_ids: [] 
+      })
     })
+    if (!res.ok) {
+      const err = await res.json()
+      alert('Error: ' + JSON.stringify(err.detail))
+      return
+    }
     fetchProjects()
     closeSlidePanel()
   }
@@ -898,6 +911,9 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
     }
     if (content?.type === 'userForm' && content.editData) {
       setFormData(content.editData)
+    }
+    if (!content?.editData) {
+      setFormData({})
     }
   }, [content])
   

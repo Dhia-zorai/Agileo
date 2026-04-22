@@ -32,5 +32,31 @@
     "sprint_ids": [
       "sprint-ecom-1"
     ]
+  },
+  {
+    "id": "dd5da73f-cf3c-46f6-8c49-a314c0fe3b21",
+    "name": "dfhdf",
+    "description": "fddf",
+    "color": "#3b82f6",
+    "icon": "FD",
+    "status": "ACTIVE",
+    "created_at": "2026-04-22T18:37:07.270881",
+    "members": [
+      "user-alice",
+      "user-bob",
+      "user-carol"
+    ],
+    "sprint_ids": []
+  },
+  {
+    "id": "a12c4fce-add3-4ee4-8af7-bf5d532c5588",
+    "name": "My Project",
+    "description": "Some description",
+    "color": "#3b82f6",
+    "icon": "MP",
+    "status": "ACTIVE",
+    "created_at": "2026-04-22T18:37:14.210937",
+    "members": [],
+    "sprint_ids": []
   }
 ]
