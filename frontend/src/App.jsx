@@ -102,6 +102,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })
     })
+    fetchProjects() // Refresh global project member counts
     closeSlidePanel()
   }
   
@@ -109,6 +110,7 @@ export default function App() {
     await fetch(`/api/projects/${projectId}/members/${userId}`, {
       method: 'DELETE'
     })
+    fetchProjects() // Refresh global project member counts
     closeSlidePanel()
   }
   
@@ -416,9 +418,13 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   const [members, setMembers] = useState([])
   const [activeTab, setActiveTab] = useState('board')
   
+  const fetchMembers = () => {
+    fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
+  }
+
   useEffect(() => {
     fetch(`/api/projects/${project.id}/sprints`).then(r => r.json()).then(setSprints)
-    fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
+    fetchMembers()
   }, [project.id])
   
   const activeSprint = sprints.find(s => s.status === 'ACTIVE')
@@ -446,7 +452,12 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       sprintId: activeSprint?.id,
       projectId: project.id,
       column: columnId,
-      onSave: (data) => onTaskCreate(project.id, activeSprint?.id, data)
+      onSave: async (data) => {
+        await onTaskCreate(project.id, activeSprint?.id, data)
+        if (activeSprint) {
+          fetch(`/api/sprints/${activeSprint.id}/tasks`).then(r => r.json()).then(setTasks)
+        }
+      }
     })
   }
   
@@ -455,13 +466,17 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       type: 'inviteMember',
       projectId: project.id,
       currentMembers: members,
-      onSave: (userId) => onInviteMember(project.id, userId)
+      onSave: async (userId) => {
+        await onInviteMember(project.id, userId)
+        fetchMembers()
+      }
     })
   }
   
-  const handleRemoveMember = (userId) => {
+  const handleRemoveMember = async (userId) => {
     if (confirm(t('project.deleteConfirm'))) {
-      onRemoveMember(project.id, userId)
+      await onRemoveMember(project.id, userId)
+      fetchMembers()
     }
   }
   
