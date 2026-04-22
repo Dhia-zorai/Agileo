@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import sys
+import os
+from pathlib import Path
+
+# Add current directory to path for Vercel
+sys.path.append(os.path.dirname(__file__))
+
 from routers import projects as projects_router
 from routers import users as users_router
 from routers import sprints as sprints_router
