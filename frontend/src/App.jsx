@@ -126,7 +126,7 @@ export default function App() {
       background: '#e8e8ed',
       fontFamily: "'Plus Jakarta Sans', sans-serif"
     }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
+      <div className="container" style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px' }}>
         
         {/* Header */}
         <Header 
@@ -212,13 +212,13 @@ export default function App() {
 
 function Header({ view, setView, onNewProject, onLangToggle }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+    <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
       <div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{t('app.title')}</h1>
-        <p style={{ fontSize: 14, color: '#6b7280' }}>{t('app.subtitle')}</p>
+        <h1 style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 700, marginBottom: 4 }}>{t('app.title')}</h1>
+        <p style={{ fontSize: 13, color: '#6b7280' }}>{t('app.subtitle')}</p>
       </div>
       
-      <div style={{ display: 'flex', gap: 8, background: '#fff', padding: 6, borderRadius: 999, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+      <div className="nav-tabs" style={{ display: 'flex', gap: 4, background: '#fff', padding: 4, borderRadius: 999, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflowX: 'auto' }}>
         {[
           { id: 'dashboard', label: t('nav.dashboard') },
           { id: 'my-tasks', label: t('nav.myTasks') },
@@ -327,7 +327,7 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
   return (
     <div>
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <StatCard value={stats.myTasks} label={t('stats.myTasks')} />
         <StatCard value={stats.inProgress} label={t('stats.inProgress')} color="#f97316" />
         <StatCard value={stats.completed} label={t('stats.completed')} color="#10b981" />
@@ -335,7 +335,7 @@ function DashboardView({ projects, onProjectClick, onNewProject, onEdit, onDelet
       
       {/* Projects */}
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>{t('project.members')}</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+      <div className="projects-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
         {projects.map(p => (
           <div 
             key={p.id}
@@ -576,7 +576,8 @@ function KanbanBoard({ tasks, columns, onDragEnd, onAddTask, onTaskEdit, onTaskD
   }
   
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+    <div className="kanban-wrapper" style={{ overflowX: 'auto', paddingBottom: 16, margin: '0 -24px', padding: '0 24px' }}>
+      <div className="kanban-board" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(280px, 1fr))', gap: 16, minWidth: 1100 }}>
       {columns.map(col => (
         <div
           key={col.id}
@@ -947,7 +948,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 999 }} />
-      <div style={{ position: 'fixed', top: 0, right: 0, width: 420, height: '100vh', background: '#fff', zIndex: 1000, padding: 24, overflowY: 'auto' }}>
+      <div className="slide-panel" style={{ position: 'fixed', top: 0, right: 0, width: 'min(100%, 420px)', height: '100vh', background: '#fff', zIndex: 1000, padding: 24, overflowY: 'auto', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600 }}>
             {content?.type === 'projectForm' ? content?.editData ? t('project.edit') : t('project.new') : 
@@ -1206,6 +1207,37 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
         }
         .form-input:focus {
           border-color: #111827;
+        }
+        @media (max-width: 768px) {
+          .header {
+            flex-direction: column;
+            align-items: flex-start !important;
+          }
+          .nav-tabs {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .stats-grid {
+            grid-template_columns: 1fr !important;
+          }
+          .projects-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .slide-panel {
+            width: 100% !important;
+          }
+        }
+        /* Custom scrollbar for horizontal Kanban */
+        .kanban-wrapper::-webkit-scrollbar {
+          height: 6px;
+        }
+        .kanban-wrapper::-webkit-scrollbar-track {
+          background: #e5e7eb;
+          border-radius: 999px;
+        }
+        .kanban-wrapper::-webkit-scrollbar-thumb {
+          background: #9ca3af;
+          border-radius: 999px;
         }
       `}</style>
     </>
