@@ -153,20 +153,28 @@ export default function App() {
 
   // CRUD: Members
   const handleInviteMember = async (projectId, userId) => {
-    await fetch(`/api/projects/${projectId}/members`, {
+    const res = await fetch(`/api/projects/${projectId}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })
     })
-    fetchProjects() // Refresh global project member counts
-    setMemberRefreshKey(k => k + 1) // Refresh team view
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(err)
+    }
+    await fetchProjects()
+    setMemberRefreshKey(k => k + 1)
     closeSlidePanel()
   }
 
   const handleRemoveMember = async (projectId, userId) => {
-    await fetch(`/api/projects/${projectId}/members/${userId}`, {
+    const res = await fetch(`/api/projects/${projectId}/members/${userId}`, {
       method: 'DELETE'
     })
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(err)
+    }
     fetchProjects() // Refresh global project member counts
     setMemberRefreshKey(k => k + 1) // Refresh team view
     closeSlidePanel()
@@ -508,7 +516,11 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   const [activeTab, setActiveTab] = useState('board')
 
   const fetchMembers = () => {
-    fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(setMembers)
+    fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(data => {
+      setMembers(data)
+      // Also trigger forceUpdate to ensure UI refresh
+      forceUpdate(n => n + 1)
+    })
   }
 
   useEffect(() => {
