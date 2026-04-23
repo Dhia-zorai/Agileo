@@ -15,6 +15,7 @@ export default function App() {
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
   const [memberRefreshKey, setMemberRefreshKey] = useState(0)
   const [teamRefreshKey, setTeamRefreshKey] = useState(0)
+  const [backlogRefreshKey, setBacklogRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
   const [projectsLoaded, setProjectsLoaded] = useState(false)
 
@@ -752,7 +753,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       )}
 
       {activeTab === 'backlog' && (
-        <BacklogView projectId={project.id} onAdd={() => openSlidePanel({
+        <BacklogView projectId={project.id} refreshKey={backlogRefreshKey} onAdd={() => openSlidePanel({
           type: 'storyForm',
           onSave: async (data) => {
             await fetch(`/api/projects/${project.id}/stories`, {
@@ -761,6 +762,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
               body: JSON.stringify(data)
             })
             closeSlidePanel()
+            setBacklogRefreshKey(k => k + 1)
           }
         })} />
       )}
@@ -922,14 +924,14 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
   )
 }
 
-function BacklogView({ projectId, onAdd }) {
+function BacklogView({ projectId, refreshKey, onAdd }) {
   const [stories, setStories] = useState([])
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/stories`)
       .then(r => r.json())
       .then(setStories)
-  }, [projectId])
+  }, [projectId, refreshKey])
 
   return (
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
