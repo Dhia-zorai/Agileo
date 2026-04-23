@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 
-from models import ProjectCreate, ProjectUpdate
+from models import ProjectCreate, ProjectUpdate, AddMemberRequest
 from storage import generate_id, read_json, write_json
 
 
@@ -120,3 +120,56 @@ def get_project_stats(project_id: str):
         "members_count": members_count,
         "velocity": velocity,
     }
+
+
+@router.post("/api/projects/{project_id}/members")
+def add_member(project_id: str, payload: AddMemberRequest):
+    """Add a member to project"""
+    project = _require_project(project_id)
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id required")
+    
+    users = read_json("users.json")
+    user = next((u for u in users if u.get("id") == user_id), None)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user_id not in project.get("members", []):
+        project["members"] = project.get("members", []) + [user_id]
+        
+        projects = read_json("projects.json")
+        idx = next((i for i, p in enumerate(projects) if p.get("id") == project_id), None)
+        projects[idx] = project
+        write_json("projects.json", projects)
+        
+        # Also update user's project_ids
+        for u in users:
+            if u.get("id") == user_id and project_id not in u.get("project_ids", []):
+                u["project_ids"] = u.get("project_ids", []) + [project_id]
+        write_json("users.json", users)
+    
+    return {"added": True, "members": project["members"]}
+
+
+@router.delete("/api/projects/{project_id}/members/{user_id}")
+def remove_member(project_id: str, user_id: str):
+    """Remove a member from project"""
+    project = _require_project(project_id)
+    
+    if user_id in project.get("members", []):
+        project["members"] = [m for m in project["members"] if m != user_id]
+        
+        projects = read_json("projects.json")
+        idx = next((i for i, p in enumerate(projects) if p.get("id") == project_id), None)
+        projects[idx] = project
+        write_json("projects.json", projects)
+        
+        # Also update user's project_ids
+        users = read_json("users.json")
+        for u in users:
+            if u.get("id") == user_id:
+                u["project_ids"] = [pid for pid in u.get("project_ids", []) if pid != project_id]
+        write_json("users.json", users)
+    
+    return {"removed": True, "members": project["members"]}
