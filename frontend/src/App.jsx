@@ -1533,7 +1533,14 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
             {users.filter(u => !content.currentMembers?.find(m => m.id === u.id)).map(user => (
               <div
                 key={user.id}
-                onClick={() => content.onSave(user.id)}
+                onClick={async () => {
+                  try {
+                    await content.onSave(user.id)
+                  } catch (err) {
+                    console.error('Error adding member:', err)
+                    alert(err.message || 'Erreur lors de l\'ajout du membre')
+                  }
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
