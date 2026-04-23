@@ -3,6 +3,7 @@ import { t, getCurrentLang, toggleLang, setStoredLang } from './i18n/index.js'
 
 export default function App() {
   const savedView = typeof localStorage !== 'undefined' ? localStorage.getItem('agileo_view') : null
+  const savedProjectId = typeof localStorage !== 'undefined' ? localStorage.getItem('agileo_project') : null
   const [view, setView] = useState(savedView || 'dashboard')
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
@@ -14,10 +15,49 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('agileo_view', view)
-  }, [view])
+    localStorage.setItem('agileo_project', selectedProject?.id || '')
+  }, [view, selectedProject])
+
+  // On first load, navigate to project view if was viewing a project before
+  useEffect(() => {
+    if (!savedView && !savedProjectId) {
+      // First ever visit - auto-open first project (Tableau de board)
+      fetchProjects().then(() => {
+        // Will auto-open in the projects effect below
+      })
+    } else if (savedProjectId && !savedView) {
+      // Had project but no view saved - go to project view
+      fetch('/api/projects/' + savedProjectId)
+        .then(r => r.json())
+        .then(project => {
+          if (project && !project.detail) {
+            setSelectedProject(project)
+            setView('project')
+          }
+        })
+        .catch(() => {})
+    }
+  }, [])
 
   useEffect(() => {
-    fetchProjects()
+    if (!savedView && !savedProjectId) {
+      fetchProjects().then(data => {
+        if (data && data.length > 0) {
+          setSelectedProject(data[0])
+          setView('project')
+        }
+      })
+    } else if (savedProjectId && !savedView) {
+      fetch('/api/projects/' + savedProjectId)
+        .then(r => r.json())
+        .then(project => {
+          if (project && !project.detail) {
+            setSelectedProject(project)
+            setView('project')
+          }
+        })
+        .catch(() => {})
+    }
   }, [])
 
   const refreshLang = () => forceUpdate(n => n + 1)
@@ -28,11 +68,14 @@ export default function App() {
       const data = await res.json()
       if (Array.isArray(data)) {
         setProjects(data)
+        return data
       } else {
         console.error('Invalid projects data:', data)
+        return []
       }
     } catch (e) {
       console.error(e)
+      return []
     }
   }
 
