@@ -929,8 +929,9 @@ function BacklogView({ projectId, refreshKey, onAdd }) {
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/stories`)
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(setStories)
+      .catch(() => setStories([]))
   }, [projectId, refreshKey])
 
   return (
