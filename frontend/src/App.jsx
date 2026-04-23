@@ -8,6 +8,7 @@ export default function App() {
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
   const [, forceUpdate] = useState(0)
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
 
   useEffect(() => {
     fetchProjects()
@@ -77,11 +78,16 @@ export default function App() {
   }
 
   const handleProjectDelete = async (id) => {
-    if (!confirm(t('project.deleteConfirm'))) return
-    await fetch(`/api/projects/${id}`, { method: 'DELETE' })
-    fetchProjects()
-    setSelectedProject(null)
-    setView('dashboard')
+    setConfirmDialog({
+      open: true,
+      message: 'Supprimer ce projet?',
+      onConfirm: async () => {
+        await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+        fetchProjects()
+        setSelectedProject(null)
+        setView('dashboard')
+      }
+    })
   }
 
   // CRUD: Tasks
@@ -129,12 +135,14 @@ export default function App() {
   }
 
   const handleTaskDelete = async (id) => {
-    if (confirm(t('task.deleteConfirm'))) {
-      await fetch(`/api/tasks/${id}`, {
-        method: 'DELETE'
-      })
-      await fetchProjects()
-    }
+    setConfirmDialog({
+      open: true,
+      message: 'Supprimer cette tâche?',
+      onConfirm: async () => {
+        await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+        await fetchProjects()
+      }
+    })
   }
 
   // CRUD: Members
@@ -208,10 +216,14 @@ onTaskEdit={handleTaskEdit}
           <TeamView
             openSlidePanel={openSlidePanel}
             onDelete={async (id) => {
-              if (confirm(t('project.deleteConfirm'))) {
-                await fetch(`/api/users/${id}`, { method: 'DELETE' })
-                forceUpdate(n => n + 1)
-              }
+              setConfirmDialog({
+                open: true,
+                message: 'Supprimer cet utilisateur?',
+                onConfirm: async () => {
+                  await fetch(`/api/users/${id}`, { method: 'DELETE' })
+                  forceUpdate(n => n + 1)
+                }
+              })
             }}
             onEdit={(user) => openSlidePanel({
               type: 'userForm',
@@ -542,10 +554,14 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   }
 
   const handleRemoveMember = async (userId) => {
-    if (confirm(t('project.deleteConfirm'))) {
-      await onRemoveMember(project.id, userId)
-      fetchMembers()
-    }
+    setConfirmDialog({
+      open: true,
+      message: 'Retirer ce membre du projet?',
+      onConfirm: async () => {
+        await onRemoveMember(project.id, userId)
+        fetchMembers()
+      }
+    })
   }
 
   const tabs = [
@@ -1336,6 +1352,21 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
           border-radius: 999px;
         }
       `}</style>
+
+      {confirmDialog.open && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)' }} onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null })} />
+          <div style={{ position: 'relative', background: '#fff', borderRadius: 16, padding: 24, width: 340, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center' }}>
+            <p style={{ fontSize: 40, marginBottom: 12 }}>!</p>
+            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{confirmDialog.message}</p>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>Cette action est irréversible.</p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null })} style={{ flex: 1, padding: '10px 16px', borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => { confirmDialog.onConfirm(); setConfirmDialog({ open: false, message: '', onConfirm: null }) }} style={{ flex: 1, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

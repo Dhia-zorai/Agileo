@@ -10,7 +10,8 @@
     "members": [
       "user-alice",
       "user-bob",
-      "user-carol"
+      "user-carol",
+      "user-dhia"
     ],
     "sprint_ids": [
       "sprint-agileo-1"

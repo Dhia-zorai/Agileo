@@ -10,16 +10,6 @@
     ]
   },
   {
-    "id": "user-amine",
-    "name": "Amine",
-    "email": "amine@agileo.app",
-    "avatar_color": "#3b82f6",
-    "role": "DEVELOPER",
-    "project_ids": [
-      "project-agileo"
-    ]
-  },
-  {
     "id": "user-carol",
     "name": "Carol Dupont",
     "email": "carol.dupont@agileo.app",
