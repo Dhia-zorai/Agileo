@@ -15,8 +15,17 @@ export default function App() {
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
   const [memberRefreshKey, setMemberRefreshKey] = useState(0)
   const [teamRefreshKey, setTeamRefreshKey] = useState(0)
+  const [backlogRefreshKey, setBacklogRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
   const [projectsLoaded, setProjectsLoaded] = useState(false)
+
+  const [currentUser, setCurrentUser] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/users').then(r => r.json()).then(data => {
+      if (data && data.length > 0) setCurrentUser(data[0])
+    })
+  }, [])
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
@@ -289,6 +298,7 @@ export default function App() {
             openSlidePanel={openSlidePanel}
             taskRefreshKey={taskRefreshKey}
             memberRefreshKey={memberRefreshKey}
+            setConfirmDialog={setConfirmDialog}
           />
         )}
 
@@ -319,7 +329,7 @@ export default function App() {
           </div>
         )}
 
-        {view === 'my-tasks' && <MyTasksView />}
+        {view === 'my-tasks' && <MyTasksView currentUser={currentUser} />}
         {view === 'team' && (
           <TeamView
             openSlidePanel={openSlidePanel}
@@ -381,7 +391,7 @@ export default function App() {
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>Cette action est irréversible.</p>
             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null })} style={{ flex: 1, padding: '10px 16px', borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>Annuler</button>
-              <button onClick={() => { confirmDialog.onConfirm(); setConfirmDialog({ open: false, message: '', onConfirm: null }) }} style={{ flex: 1, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Supprimer</button>
+              <button onClick={async () => { await confirmDialog.onConfirm(); setConfirmDialog({ open: false, message: '', onConfirm: null }) }} style={{ flex: 1, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -601,17 +611,16 @@ function ProjectProgress({ projectId, tasks }) {
   )
 }
 
-function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel, taskRefreshKey, memberRefreshKey }) {
+function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel, taskRefreshKey, memberRefreshKey, setConfirmDialog }) {
   const [sprints, setSprints] = useState([])
   const [tasks, setTasks] = useState([])
   const [members, setMembers] = useState([])
   const [activeTab, setActiveTab] = useState('board')
+  const [backlogRefreshKey, setBacklogRefreshKey] = useState(0)
 
   const fetchMembers = () => {
     fetch(`/api/projects/${project.id}/members`).then(r => r.json()).then(data => {
       setMembers(data)
-      // Also trigger forceUpdate to ensure UI refresh
-      forceUpdate(n => n + 1)
     })
   }
 
@@ -751,19 +760,33 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
         />
       )}
 
-      {activeTab === 'backlog' && (
-        <BacklogView projectId={project.id} onAdd={() => openSlidePanel({
-          type: 'storyForm',
-          onSave: async (data) => {
-            await fetch(`/api/projects/${project.id}/stories`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
+{activeTab === 'backlog' && (
+        <BacklogView 
+          projectId={project.id} 
+          refreshKey={backlogRefreshKey} 
+          onAdd={() => openSlidePanel({
+            type: 'storyForm',
+            onSave: async (data) => {
+              await fetch(`/api/projects/${project.id}/stories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              })
+              closeSlidePanel()
+              setBacklogRefreshKey(k => k + 1)
+            }
+          })}
+          onDelete={(storyId) => {
+            setConfirmDialog({
+              open: true,
+              message: 'Supprimer cette histoire utilisateur?',
+              onConfirm: async () => {
+                await fetch(`/api/stories/${storyId}`, { method: 'DELETE' })
+                setBacklogRefreshKey(k => k + 1)
+              }
             })
-            closeSlidePanel()
-            forceUpdate(n => n + 1)
-          }
-        })} />
+          }} 
+        />
       )}
 
       {activeTab === 'members' && (
@@ -923,14 +946,14 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
   )
 }
 
-function BacklogView({ projectId, onAdd }) {
+function BacklogView({ projectId, onAdd, onDelete, refreshKey }) {
   const [stories, setStories] = useState([])
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/stories`)
       .then(r => r.json())
       .then(setStories)
-  }, [projectId])
+  }, [projectId, refreshKey])
 
   return (
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
@@ -951,6 +974,12 @@ function BacklogView({ projectId, onAdd }) {
               <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, background: '#f3f4f6', color: '#6b7280' }}>
                 {story.story_points} pts
               </span>
+              <button 
+                onClick={() => onDelete(story.id)}
+                style={{ marginLeft: 'auto', padding: '2px 6px', borderRadius: 6, border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: 12 }}
+              >
+                🗑️
+              </button>
             </div>
           </div>
         ))}
@@ -1000,15 +1029,17 @@ function MembersView({ projectId, members, onInvite, onRemove }) {
   )
 }
 
-function MyTasksView() {
+function MyTasksView({ currentUser }) {
   const [tasks, setTasks] = useState([])
   const [filter, setFilter] = useState('all')
   const [projects, setProjects] = useState([])
 
   useEffect(() => {
-    fetch('/api/tasks?assignee_id=user-alice').then(r => r.json()).then(setTasks)
+    if (currentUser) {
+      fetch(`/api/tasks?assignee_id=${currentUser.id}`).then(r => r.json()).then(setTasks)
+    }
     fetch('/api/projects').then(r => r.json()).then(setProjects)
-  }, [])
+  }, [currentUser])
 
   const getProjectName = (id) => projects.find(p => p.id === id)?.name || id
 
@@ -1139,8 +1170,10 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
   const [users, setUsers] = useState([])
   const [taskForm, setTaskForm] = useState({ priority: 'MEDIUM', status: 'TODO' })
   const [stories, setStories] = useState([])
+  const [error, setError] = useState(null)
 
   useEffect(() => {
+    setError(null)
     if (content?.type === 'inviteMember') {
       fetch('/api/users').then(r => r.json()).then(setUsers)
     }
@@ -1177,15 +1210,20 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
 
   if (!isOpen) return null
 
-  const handleSubmit = () => {
-    if (content?.type === 'taskForm') {
-      content.onSave(taskForm)
-    } else if (content?.type === 'inviteMember') {
-      content.onSave(formData.user_id)
-    } else if (content?.type === 'storyForm') {
-      content.onSave(formData)
-    } else if (content?.type === 'userForm' || content?.type === 'projectForm') {
-      content.onSave(formData)
+  const handleSubmit = async () => {
+    setError(null)
+    try {
+      if (content?.type === 'taskForm') {
+        await content.onSave(taskForm)
+      } else if (content?.type === 'inviteMember') {
+        await content.onSave(formData.user_id)
+      } else if (content?.type === 'storyForm') {
+        await content.onSave(formData)
+      } else if (content?.type === 'userForm' || content?.type === 'projectForm') {
+        await content.onSave(formData)
+      }
+    } catch (err) {
+      setError(err.message || 'Une erreur est survenue')
     }
   }
 
@@ -1203,6 +1241,12 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>×</button>
         </div>
+
+        {error && (
+          <div style={{ padding: 12, borderRadius: 8, background: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', fontSize: 13, marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
 
         {/* Project Form */}
         {content?.type === 'projectForm' && (
