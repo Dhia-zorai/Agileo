@@ -752,11 +752,22 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       )}
 
       {activeTab === 'backlog' && (
-        <BacklogView projectId={project.id} />
+        <BacklogView projectId={project.id} onAdd={() => openSlidePanel({
+          type: 'storyForm',
+          onSave: async (data) => {
+            await fetch(`/api/projects/${project.id}/stories`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            })
+            closeSlidePanel()
+          }
+        })} />
       )}
 
       {activeTab === 'members' && (
         <MembersView
+          projectId={project.id}
           members={members}
           onInvite={handleInvite}
           onRemove={handleRemoveMember}
@@ -911,7 +922,7 @@ function TaskCard({ task, onDragStart, isDragging, onEdit, onDelete }) {
   )
 }
 
-function BacklogView({ projectId }) {
+function BacklogView({ projectId, onAdd }) {
   const [stories, setStories] = useState([])
 
   useEffect(() => {
@@ -924,7 +935,7 @@ function BacklogView({ projectId }) {
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h3 style={{ fontSize: 16, fontWeight: 600 }}>{t('tabs.backlog')}</h3>
-        <button style={{ padding: '8px 16px', borderRadius: 999, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer' }}>
+        <button onClick={onAdd} style={{ padding: '8px 16px', borderRadius: 999, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer' }}>
           + {t('story.add')}
         </button>
       </div>
@@ -947,7 +958,7 @@ function BacklogView({ projectId }) {
   )
 }
 
-function MembersView({ members, onInvite, onRemove }) {
+function MembersView({ projectId, members, onInvite, onRemove }) {
   return (
     <div style={{ padding: 20, borderRadius: 20, background: '#fff' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -976,7 +987,7 @@ function MembersView({ members, onInvite, onRemove }) {
             <div style={{ fontWeight: 600 }}>{member.name}</div>
             <div style={{ fontSize: 12, color: '#6b7280' }}>{member.role}</div>
             <button
-              onClick={() => onRemove(member.id)}
+              onClick={() => onRemove(projectId, member.id)}
               style={{ marginTop: 8, padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 11 }}
             >
               {t('actions.delete')}
@@ -1163,6 +1174,8 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
       content.onSave(taskForm)
     } else if (content?.type === 'inviteMember') {
       content.onSave(formData.user_id)
+    } else if (content?.type === 'storyForm') {
+      content.onSave(formData)
     } else if (content?.type === 'userForm' || content?.type === 'projectForm') {
       content.onSave(formData)
     }
@@ -1176,8 +1189,9 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
           <h2 style={{ fontSize: 18, fontWeight: 600 }}>
             {content?.type === 'projectForm' ? content?.editData ? t('project.edit') : t('project.new') :
               content?.type === 'taskForm' ? content?.editData ? t('task.edit') : t('task.new') :
-                content?.type === 'userForm' ? content?.editData ? t('actions.edit') : t('actions.invite') :
-                  t('project.invite')}
+                content?.type === 'storyForm' ? t('story.add') :
+                  content?.type === 'userForm' ? content?.editData ? t('actions.edit') : t('actions.invite') :
+                    t('project.invite')}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}>×</button>
         </div>
@@ -1325,6 +1339,66 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
               }}
             >
               {content?.editData ? t('actions.save') : t('task.create')}
+            </button>
+          </div>
+        )}
+
+        {/* Story Form */}
+        {content?.type === 'storyForm' && (
+          <div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>En tant que</label>
+              <input
+                className="form-input"
+                value={formData.as_a || ''}
+                onChange={(e) => setFormData({ ...formData, as_a: e.target.value })}
+                placeholder="rôle (ex: développeur)"
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Je veux</label>
+              <input
+                className="form-input"
+                value={formData.i_want || ''}
+                onChange={(e) => setFormData({ ...formData, i_want: e.target.value })}
+                placeholder="fonctionnalité (ex: gérer les tâches)"
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Afin de</label>
+              <input
+                className="form-input"
+                value={formData.so_that || ''}
+                onChange={(e) => setFormData({ ...formData, so_that: e.target.value })}
+                placeholder="bénéfice (ex: suivre l'avancement)"
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Priorité</label>
+              <select
+                className="form-input"
+                value={formData.priority || 'COULD'}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              >
+                <option value="MUST">Must Have</option>
+                <option value="SHOULD">Should Have</option>
+                <option value="COULD">Could Have</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>Story Points</label>
+              <input
+                className="form-input"
+                type="number"
+                value={formData.story_points || 1}
+                onChange={(e) => setFormData({ ...formData, story_points: parseInt(e.target.value) || 1 })}
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              style={{ width: '100%', padding: 12, borderRadius: 8, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14 }}
+            >
+              {t('task.create')}
             </button>
           </div>
         )}
