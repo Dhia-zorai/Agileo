@@ -1201,7 +1201,7 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
     }
     
     if (content?.type === 'storyForm') {
-      setFormData({ as_a: '', i_want: '', so_that: '', priority: 'COULD', story_points: 1 })
+      setFormData({ as_a: '', i_want: '', so_that: '', priority: 'COULD', story_points: 1, status: 'TODO' })
     }
     if (content?.type === 'inviteMember') {
       setFormData({ user_id: '' })
