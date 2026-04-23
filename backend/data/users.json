@@ -30,16 +30,24 @@
   {
     "id": "d299c054-063f-4da5-be8d-d2ecf7cd12f2",
     "name": "df",
-    "email": "sd",
+    "email": "s",
     "avatar_color": "#ec4899",
     "role": "PRODUCT_OWNER",
     "project_ids": []
   },
   {
-    "id": "89fb05e0-2ec0-4455-bf5e-29a80f4159be",
-    "name": "dfg",
-    "email": "dfgdfg",
-    "avatar_color": "#ec4899",
+    "id": "ef3608c6-647e-4592-8d63-e708619ef853",
+    "name": "fsfjf",
+    "email": "fdsf@gsfs.app",
+    "avatar_color": "#3b82f6",
+    "role": "PRODUCT_OWNER",
+    "project_ids": []
+  },
+  {
+    "id": "d642bb69-cb12-4b0c-a2da-df5d7e169106",
+    "name": "dsfsdfsdfsdf",
+    "email": "sdf@gmail.com",
+    "avatar_color": "#f97316",
     "role": "PRODUCT_OWNER",
     "project_ids": []
   }

@@ -85,27 +85,10 @@ def list_project_members(project_id: str):
     return [user for user in users if user.get("id") in member_ids]
 
 
-@router.post("/api/projects/{project_id}/members", status_code=201)
-def add_project_member(project_id: str, payload: AddMemberRequest):
-    _project_or_404(project_id)
-    _user_or_404(payload.user_id)
-
-    projects = read_json("projects.json")
-    users = read_json("users.json")
-
-    for project in projects:
-        if project.get("id") == project_id and payload.user_id not in project.get("members", []):
-            project["members"].append(payload.user_id)
-
-    for user in users:
-        if user.get("id") == payload.user_id and project_id not in user.get("project_ids", []):
-            user["project_ids"].append(project_id)
-
-    write_json("projects.json", projects)
-    write_json("users.json", users)
-
-    updated_project = next(item for item in projects if item.get("id") == project_id)
-    return {"project_id": project_id, "members": updated_project.get("members", [])}
+@router.get("/api/projects/{project_id}/members")
+def list_project_members(project_id: str):
+    """Get member details for a project"""
+    return []
 
 
 @router.delete("/api/projects/{project_id}/members/{user_id}")

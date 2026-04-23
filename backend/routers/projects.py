@@ -126,7 +126,7 @@ def get_project_stats(project_id: str):
 def add_member(project_id: str, payload: AddMemberRequest):
     """Add a member to project"""
     project = _require_project(project_id)
-    user_id = payload.get("user_id")
+    user_id = payload.user_id
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id required")
     
