@@ -8,6 +8,7 @@ export default function App() {
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
   const [, forceUpdate] = useState(0)
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
+  const [memberRefreshKey, setMemberRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
 
   useEffect(() => {
@@ -153,6 +154,7 @@ export default function App() {
       body: JSON.stringify({ user_id: userId })
     })
     fetchProjects() // Refresh global project member counts
+    setMemberRefreshKey(k => k + 1) // Refresh team view
     closeSlidePanel()
   }
 
@@ -161,6 +163,7 @@ export default function App() {
       method: 'DELETE'
     })
     fetchProjects() // Refresh global project member counts
+    setMemberRefreshKey(k => k + 1) // Refresh team view
     closeSlidePanel()
   }
 
@@ -202,12 +205,13 @@ export default function App() {
             project={selectedProject}
             onBack={() => { setView('dashboard'); setSelectedProject(null) }}
             onTaskCreate={(projectId, sprintId, data) => handleTaskCreate(projectId, sprintId, data)}
-onTaskEdit={handleTaskEdit}
+            onTaskEdit={handleTaskEdit}
             onTaskDelete={handleTaskDelete}
             onInviteMember={(projectId, userId) => handleInviteMember(projectId, userId)}
             onRemoveMember={(projectId, userId) => handleRemoveMember(projectId, userId)}
             openSlidePanel={openSlidePanel}
             taskRefreshKey={taskRefreshKey}
+            memberRefreshKey={memberRefreshKey}
           />
         )}
 
@@ -492,7 +496,7 @@ function ProjectProgress({ projectId, tasks }) {
   )
 }
 
-function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel, taskRefreshKey }) {
+function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDelete, onInviteMember, onRemoveMember, openSlidePanel, taskRefreshKey, memberRefreshKey }) {
   const [sprints, setSprints] = useState([])
   const [tasks, setTasks] = useState([])
   const [members, setMembers] = useState([])
@@ -505,7 +509,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
   useEffect(() => {
     fetch(`/api/projects/${project.id}/sprints`).then(r => r.json()).then(setSprints)
     fetchMembers()
-  }, [project.id])
+  }, [project.id, memberRefreshKey])
 
   const activeSprint = sprints.find(s => s.status === 'ACTIVE')
 
