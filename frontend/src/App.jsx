@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { t, getCurrentLang, toggleLang, setStoredLang } from './i18n/index.js'
 
 export default function App() {
-  const [view, setView] = useState('dashboard')
+  const savedView = typeof localStorage !== 'undefined' ? localStorage.getItem('agileo_view') : null
+  const [view, setView] = useState(savedView || 'dashboard')
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
@@ -10,6 +11,10 @@ export default function App() {
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
   const [memberRefreshKey, setMemberRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
+
+  useEffect(() => {
+    localStorage.setItem('agileo_view', view)
+  }, [view])
 
   useEffect(() => {
     fetchProjects()
