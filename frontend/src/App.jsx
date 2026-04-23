@@ -573,7 +573,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       currentMembers: members,
       onSave: async (userId) => {
         await onInviteMember(project.id, userId)
-        fetchMembers()
+        await fetchMembers()
       }
     })
   }
@@ -584,7 +584,7 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
       message: 'Retirer ce membre du projet?',
       onConfirm: async () => {
         await onRemoveMember(project.id, userId)
-        fetchMembers()
+        await fetchMembers()
       }
     })
   }
