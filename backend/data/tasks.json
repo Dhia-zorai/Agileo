@@ -20,7 +20,7 @@
     "title": "US3 - Create Tasks",
     "description": "Create tasks to structure the work that needs to be done.",
     "assignee_id": "user-dhia",
-    "status": "IN_PROGRESS",
+    "status": "DONE",
     "priority": "HIGH",
     "due_date": "2026-04-24",
     "sort_order": 1
@@ -33,7 +33,7 @@
     "title": "US4 - Consult My Tasks",
     "description": "View specific tasks to know exactly what to work on.",
     "assignee_id": "user-dhia",
-    "status": "IN_PROGRESS",
+    "status": "DONE",
     "priority": "MEDIUM",
     "due_date": "2026-04-25",
     "sort_order": 2

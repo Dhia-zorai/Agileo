@@ -5,7 +5,7 @@ import { LayoutDashboard, FolderKanban, ListTodo, Users, BarChart2, Settings } f
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/projects', icon: FolderKanban, label: 'Projects' },
-  { to: '/my-tasks', icon: ListTodo, label: 'My Tasks' },
+  { to: '/my-tasks', icon: ListTodo, label: 'Mes tâches' },
   { to: '/members', icon: Users, label: 'Members' },
   { to: '/reports', icon: BarChart2, label: 'Reports' },
   { to: '/settings', icon: Settings, label: 'Settings' },

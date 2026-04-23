@@ -45,7 +45,7 @@ export default function MyTasksPage() {
   
   return (
     <div className="fade-in">
-      <h1 className="hero-title">My Tasks</h1>
+      <h1 className="hero-title">Mes tâches</h1>
       <p className="hero-subtitle">Tasks assigned to you</p>
       
       <div className="filter-tabs" style={{ marginBottom: 24 }}>

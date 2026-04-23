@@ -62,7 +62,7 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         <div className="card" style={{ padding: 20 }}>
           <div style={{ fontSize: 36, fontWeight: 700 }}>{myTasks.length}</div>
-          <div style={{ fontSize: 12, color: '#9ca3af' }}>My Tasks</div>
+          <div style={{ fontSize: 12, color: '#9ca3af' }}>Mes tâches</div>
         </div>
         <div className="card" style={{ padding: 20 }}>
           <div style={{ fontSize: 36, fontWeight: 700, color: '#f97316' }}>{inProgressTasks}</div>
@@ -140,10 +140,10 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* My Tasks */}
+      {/* Mes tâches */}
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>My Tasks</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 600 }}>Mes tâches</h2>
           <span style={{
             padding: '4px 10px',
             borderRadius: 999,
