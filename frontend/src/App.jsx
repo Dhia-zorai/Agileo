@@ -1170,6 +1170,9 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
     if (content?.type === 'storyForm') {
       setFormData({ as_a: '', i_want: '', so_that: '', priority: 'COULD', story_points: 1 })
     }
+    if (content?.type === 'inviteMember') {
+      setFormData({ user_id: '' })
+    }
   }, [content])
 
   if (!isOpen) return null
@@ -1483,36 +1486,30 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
         {content?.type === 'inviteMember' && (
           <div>
             <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>{t('project.invite')}:</div>
-            {users.length === 0 ? (
-              <div style={{ padding: 20, textAlign: 'center', color: '#6b7280' }}>Chargement...</div>
-            ) : users.filter(u => !content.currentMembers?.find(m => m.id === u.id)).length === 0 ? (
-              <div style={{ padding: 20, textAlign: 'center', color: '#6b7280' }}>Aucun utilisateur disponible</div>
-            ) : (
-              users.filter(u => !content.currentMembers?.find(m => m.id === u.id)).map(user => (
-                <div
-                  key={user.id}
-                  onClick={() => content.onSave(user.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: 12,
-                    borderRadius: 12,
-                    background: '#f9fafb',
-                    marginBottom: 8,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: user.avatar_color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600 }}>
-                    {user.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 500 }}>{user.name}</div>
-                    <div style={{ fontSize: 12, color: '#6b7280' }}>{user.role}</div>
-                  </div>
+            {users.filter(u => !content.currentMembers?.find(m => m.id === u.id)).map(user => (
+              <div
+                key={user.id}
+                onClick={() => content.onSave(user.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: 12,
+                  borderRadius: 12,
+                  background: '#f9fafb',
+                  marginBottom: 8,
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: user.avatar_color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600 }}>
+                  {user.name.split(' ').map(n => n[0]).join('')}
                 </div>
-              ))
-            )}
+                <div>
+                  <div style={{ fontWeight: 500 }}>{user.name}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>{user.role}</div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
