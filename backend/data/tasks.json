@@ -4,12 +4,12 @@
     "story_id": "story-us2",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US2 -  Inviter des membres",
-    "description": "Inviter des membres au projet",
+    "title": "US2 - Invite Members",
+    "description": "Invite members to the project to group all participants in one workspace.",
     "assignee_id": "user-dhia",
     "status": "DONE",
     "priority": "HIGH",
-    "due_date": "2026-04-21",
+    "due_date": "2026-04-22",
     "sort_order": 0
   },
   {
@@ -17,12 +17,12 @@
     "story_id": "story-us3",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US3 - Creation des taches",
-    "description": "",
+    "title": "US3 - Create Tasks",
+    "description": "Create tasks to structure the work that needs to be done.",
     "assignee_id": "user-dhia",
-    "status": "DONE",
+    "status": "IN_PROGRESS",
     "priority": "HIGH",
-    "due_date": "2026-04-23",
+    "due_date": "2026-04-24",
     "sort_order": 1
   },
   {
@@ -30,12 +30,12 @@
     "story_id": "story-us4",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US4 -Consulter les t\u00e2ches",
-    "description": "Voir les taches specifiques",
+    "title": "US4 - Consult My Tasks",
+    "description": "View specific tasks to know exactly what to work on.",
     "assignee_id": "user-dhia",
-    "status": "DONE",
+    "status": "IN_PROGRESS",
     "priority": "MEDIUM",
-    "due_date": "2026-04-24",
+    "due_date": "2026-04-25",
     "sort_order": 2
   },
   {
@@ -43,12 +43,12 @@
     "story_id": "story-us5",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US5 - Modifier l'etat d'une tache",
-    "description": "Modifier l'\u00e9tat d'une t\u00e2che",
+    "title": "US5 - Modify Task Status",
+    "description": "Change the state of a task to provide real-time tracking.",
     "assignee_id": "user-amine",
-    "status": "DONE",
+    "status": "TODO",
     "priority": "MEDIUM",
-    "due_date": "2026-04-25",
+    "due_date": "2026-04-26",
     "sort_order": 3
   },
   {
@@ -56,12 +56,12 @@
     "story_id": "story-us6",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US6 -Consulter l'avancement",
-    "description": "Consulter l'avancement d'une tache",
+    "title": "US6 - Consult Progress",
+    "description": "View global advancement via dashboard or Kanban.",
     "assignee_id": "user-amine",
     "status": "TODO",
     "priority": "LOW",
-    "due_date": "2026-04-26",
+    "due_date": "2026-04-27",
     "sort_order": 4
   },
   {
@@ -69,12 +69,12 @@
     "story_id": "story-us7",
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
-    "title": "US7 -  Ajouter des commentaires",
-    "description": "",
+    "title": "US7 - Team Communication",
+    "description": "Use dedicated chat or discussion space.",
     "assignee_id": "user-carol",
     "status": "TODO",
     "priority": "LOW",
-    "due_date": "2026-04-27",
+    "due_date": "2026-04-28",
     "sort_order": 5
   },
   {
@@ -83,11 +83,11 @@
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
     "title": "US8 - File Sharing",
-    "description": "Recevoir des notifications",
+    "description": "Upload and share files related to tasks.",
     "assignee_id": "user-carol",
     "status": "TODO",
     "priority": "LOW",
-    "due_date": "2026-04-28",
+    "due_date": "2026-04-29",
     "sort_order": 6
   }
 ]

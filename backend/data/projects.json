@@ -6,12 +6,10 @@
     "color": "#7c3aed",
     "icon": "AG",
     "status": "ACTIVE",
-    "created_at": "2026-04-21T20:42:31.055205",
+    "created_at": "2026-04-22T06:46:20.512691",
     "members": [
-      "user-alice",
-      "user-bob",
-      "user-carol",
-      "user-dhia"
+      "user-dhia",
+      "user-amine"
     ],
     "sprint_ids": [
       "sprint-agileo-1"
