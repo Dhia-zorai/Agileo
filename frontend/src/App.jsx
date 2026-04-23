@@ -99,17 +99,31 @@ export default function App() {
   // CRUD: Tasks
   const handleTaskCreate = async (projectId, sprintId, data) => {
     try {
+      const payload = {
+        title: data.title || 'Nouvelle tâche',
+        description: data.description || '',
+        project_id: projectId,
+        story_id: data.story_id || '',
+        priority: data.priority || 'MEDIUM',
+        status: 'TODO',
+        assignee_id: data.assignee_id || null,
+        due_date: data.due_date || null,
+        sort_order: 0,
+      }
+      console.log('Creating task with payload:', payload)
       const res = await fetch(`/api/sprints/${sprintId}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, project_id: projectId, sprint_id: sprintId })
+        body: JSON.stringify(payload)
       })
-      if (!res.ok) throw new Error(await res.text())
+      const result = await res.json()
+      console.log('Create task response:', result)
+      if (!res.ok) throw new Error(result.detail || 'Unknown error')
       await fetchProjects()
       closeSlidePanel()
     } catch (err) {
-      console.error(err)
-      alert('Error creating task: ' + err.message)
+      console.error('Task creation error:', err)
+      alert('Erreur création tâche: ' + err.message)
     }
   }
 
