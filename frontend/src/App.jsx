@@ -14,6 +14,7 @@ export default function App() {
   const [, forceUpdate] = useState(0)
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
   const [memberRefreshKey, setMemberRefreshKey] = useState(0)
+  const [teamRefreshKey, setTeamRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
   const [projectsLoaded, setProjectsLoaded] = useState(false)
 
@@ -209,6 +210,7 @@ export default function App() {
       onConfirm: async () => {
         await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
         await fetchProjects()
+        setTaskRefreshKey(k => k + 1)
       }
     })
   }
@@ -321,13 +323,14 @@ export default function App() {
         {view === 'team' && (
           <TeamView
             openSlidePanel={openSlidePanel}
+            refreshKey={teamRefreshKey}
             onDelete={async (id) => {
               setConfirmDialog({
                 open: true,
                 message: 'Supprimer cet utilisateur?',
                 onConfirm: async () => {
                   await fetch(`/api/users/${id}`, { method: 'DELETE' })
-                  forceUpdate(n => n + 1)
+                  setTeamRefreshKey(k => k + 1)
                 }
               })
             }}
@@ -341,7 +344,7 @@ export default function App() {
                   body: JSON.stringify(data)
                 })
                 closeSlidePanel()
-                forceUpdate(n => n + 1)
+                setTeamRefreshKey(k => k + 1)
               }
             })}
             onAdd={() => openSlidePanel({
@@ -353,7 +356,7 @@ export default function App() {
                   body: JSON.stringify(data)
                 })
                 closeSlidePanel()
-                forceUpdate(n => n + 1)
+                setTeamRefreshKey(k => k + 1)
               }
             })}
           />
@@ -638,11 +641,6 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
     fetchTasks()
   }, [activeSprint, taskRefreshKey])
 
-  const handleTaskAction = async (action, ...args) => {
-    await action(...args)
-    fetchTasks()
-  }
-
   const handleDragEnd = async (taskId, newStatus) => {
     await fetch(`/api/tasks/${taskId}/status`, {
       method: 'PATCH',
@@ -748,8 +746,8 @@ function ProjectDetailView({ project, onBack, onTaskCreate, onTaskEdit, onTaskDe
           columns={KANBAN_COLUMNS}
           onDragEnd={handleDragEnd}
           onAddTask={handleAddTask}
-          onTaskEdit={(task) => handleTaskAction(onTaskEdit, task)}
-          onTaskDelete={(taskId) => handleTaskAction(onTaskDelete, taskId)}
+          onTaskEdit={onTaskEdit}
+          onTaskDelete={onTaskDelete}
         />
       )}
 
@@ -1067,12 +1065,12 @@ function MyTasksView() {
   )
 }
 
-function TeamView({ openSlidePanel, onAdd, onEdit, onDelete }) {
+function TeamView({ openSlidePanel, onAdd, onEdit, onDelete, refreshKey }) {
   const [members, setMembers] = useState([])
 
   useEffect(() => {
     fetch('/api/users').then(r => r.json()).then(setMembers)
-  }, [])
+  }, [refreshKey])
 
   return (
     <div>
