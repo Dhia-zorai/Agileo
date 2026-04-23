@@ -57,10 +57,10 @@
     "sprint_id": "sprint-agileo-1",
     "project_id": "project-agileo",
     "title": "US6 - Consulter l'avancement",
-    "description": "Consulter l'avancement global via le tableau Kanban.",
+    "description": "Consulter l'avancement global via le tableau Kanban",
     "assignee_id": "user-amine",
-    "status": "TODO",
-    "priority": "LOW",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
     "due_date": "2026-04-27",
     "sort_order": 4
   },
@@ -89,18 +89,5 @@
     "priority": "LOW",
     "due_date": "2026-04-29",
     "sort_order": 6
-  },
-  {
-    "id": "ebe8c8c2-4567-49f9-a49e-500e4ff84763",
-    "story_id": "story-us2",
-    "sprint_id": "sprint-agileo-1",
-    "project_id": "project-agileo",
-    "title": "sdfsd",
-    "description": "sdfsdf",
-    "assignee_id": null,
-    "status": "TODO",
-    "priority": "LOW",
-    "due_date": "2026-04-13",
-    "sort_order": 0
   }
 ]

@@ -3,7 +3,11 @@ import { t, getCurrentLang, toggleLang, setStoredLang } from './i18n/index.js'
 
 export default function App() {
   const savedView = typeof localStorage !== 'undefined' ? localStorage.getItem('agileo_view') : null
-  const [view, setView] = useState(savedView || 'dashboard')
+  const savedProjectId = typeof localStorage !== 'undefined' ? localStorage.getItem('agileo_project_id') : null
+  const allowedViews = ['dashboard', 'project', 'my-tasks', 'team']
+  const isSavedProjectViewValid = savedView === 'project' ? Boolean(savedProjectId) : true
+  const initialView = savedView && allowedViews.includes(savedView) && isSavedProjectViewValid ? savedView : 'dashboard'
+  const [view, setView] = useState(initialView)
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
   const [slidePanel, setSlidePanel] = useState({ open: false, content: null })
@@ -11,14 +15,26 @@ export default function App() {
   const [taskRefreshKey, setTaskRefreshKey] = useState(0)
   const [memberRefreshKey, setMemberRefreshKey] = useState(0)
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
+  const [projectsLoaded, setProjectsLoaded] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem('agileo_view', view)
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('agileo_view', view)
+    }
   }, [view])
 
   useEffect(() => {
     fetchProjects()
   }, [])
+
+  useEffect(() => {
+    if (typeof localStorage === 'undefined') return
+    if (selectedProject?.id) {
+      localStorage.setItem('agileo_project_id', selectedProject.id)
+    } else {
+      localStorage.removeItem('agileo_project_id')
+    }
+  }, [selectedProject])
 
   const refreshLang = () => forceUpdate(n => n + 1)
 
@@ -33,8 +49,40 @@ export default function App() {
       }
     } catch (e) {
       console.error(e)
+    } finally {
+      setProjectsLoaded(true)
     }
   }
+
+  useEffect(() => {
+    if (!projectsLoaded) return
+
+    if (view === 'project' && !selectedProject) {
+      const restoredProject = projects.find(p => p.id === savedProjectId)
+      if (restoredProject) {
+        setSelectedProject(restoredProject)
+      } else {
+        setView('dashboard')
+      }
+    }
+  }, [projectsLoaded, view, selectedProject, projects, savedProjectId])
+
+  useEffect(() => {
+    if (!selectedProject) return
+    const refreshedProject = projects.find(p => p.id === selectedProject.id)
+    if (refreshedProject) {
+      setSelectedProject(prev => {
+        if (!prev) return refreshedProject
+        if (prev.id === refreshedProject.id && JSON.stringify(prev) === JSON.stringify(refreshedProject)) {
+          return prev
+        }
+        return refreshedProject
+      })
+    } else if (view === 'project') {
+      setSelectedProject(null)
+      setView('dashboard')
+    }
+  }, [projects, selectedProject, view])
 
   const openSlidePanel = (content) => setSlidePanel({ open: true, content })
   const closeSlidePanel = () => setSlidePanel({ open: false, content: null })
@@ -240,6 +288,33 @@ export default function App() {
             taskRefreshKey={taskRefreshKey}
             memberRefreshKey={memberRefreshKey}
           />
+        )}
+
+        {view === 'project' && !selectedProject && (
+          <div style={{ textAlign: 'center', padding: 60 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12 }}>
+              {projectsLoaded ? t('welcome.title') : 'Chargement du projet...'}
+            </h2>
+            <p style={{ color: '#6b7280', marginBottom: 20 }}>
+              {projectsLoaded ? 'Projet introuvable. Retour au tableau de bord.' : 'Restauration de votre dernier projet...'}
+            </p>
+            {projectsLoaded && (
+              <button
+                onClick={() => setView('dashboard')}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 999,
+                  border: 'none',
+                  background: '#111827',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                {t('nav.dashboard')}
+              </button>
+            )}
+          </div>
         )}
 
         {view === 'my-tasks' && <MyTasksView />}
