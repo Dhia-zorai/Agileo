@@ -14,9 +14,33 @@
     "name": "Amine Saidani",
     "email": "amine@agileo.app",
     "avatar_color": "#3b82f6",
-    "role": "DEVELOPER",
+    "role": "PRODUCT_OWNER",
     "project_ids": [
       "project-agileo"
     ]
+  },
+  {
+    "id": "9392575f-d422-47ae-a80f-a61c795b7ce6",
+    "name": "sdfgh",
+    "email": "sdgsdg",
+    "avatar_color": "#10b981",
+    "role": "PRODUCT_OWNER",
+    "project_ids": []
+  },
+  {
+    "id": "d299c054-063f-4da5-be8d-d2ecf7cd12f2",
+    "name": "df",
+    "email": "sd",
+    "avatar_color": "#ec4899",
+    "role": "PRODUCT_OWNER",
+    "project_ids": []
+  },
+  {
+    "id": "89fb05e0-2ec0-4455-bf5e-29a80f4159be",
+    "name": "dfg",
+    "email": "dfgdfg",
+    "avatar_color": "#ec4899",
+    "role": "PRODUCT_OWNER",
+    "project_ids": []
   }
 ]
