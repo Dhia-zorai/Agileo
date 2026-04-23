@@ -1534,20 +1534,17 @@ function SlidePanel({ isOpen, onClose, content, projects }) {
               <div
                 key={user.id}
                 onClick={async () => {
-                  console.log('User clicked:', user)
-                  console.log('user.id:', user.id)
-                  // Direct API call - bypass onSave to debug
                   const res = await fetch(`/api/projects/${content.projectId}/members`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id })
                   })
-                  console.log('API response:', res.status, await res.text())
                   if (res.ok) {
-                    // Refresh and close
-                    window.location.reload()
+                    closeSlidePanel()
+                    setMemberRefreshKey(k => k + 1)
                   } else {
-                    alert('Erreur lors de l\'ajout du membre')
+                    const err = await res.text()
+                    alert(err || 'Erreur lors de l\'ajout du membre')
                   }
                 }}
                 style={{
